@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class SimulationForce : MonoBehaviour
 {
-    public DigitalController elbow_controller = new PIDController(5, 0.01, 2, Time.fixedDeltaTime, -40);
-    public DigitalController shoulder_abduction_controller = new PIDController(5, 0.01, 2, Time.fixedDeltaTime, -40);
-    public DigitalController shoulder_flexion_controller = new PIDController(5, 0.01, 2, Time.fixedDeltaTime, -40);
+    public DigitalController elbow_controller;
+    public DigitalController shoulder_abduction_controller;
+    public DigitalController shoulder_flexion_controller;
 
     public float elbow_angle;
     public float shoulder_flexion;
@@ -21,6 +21,10 @@ public class SimulationForce : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        elbow_controller = new PIDController(5, 0.01f, 2, Time.fixedDeltaTime, -40);
+        shoulder_abduction_controller = new PIDController(5, 0.01f, 2, Time.fixedDeltaTime, -40);
+        shoulder_flexion_controller = new PIDController(5, 0.01f, 2, Time.fixedDeltaTime, -40);
+
         if (TryGetComponent(out Rigidbody found_rigid_body))
         {
             cached_mass = found_rigid_body.mass;
@@ -44,8 +48,8 @@ public class SimulationForce : MonoBehaviour
     void applyForces(Vector3 force)
     {
         elbow_controller.controlEffort();
-        shoulder_z_controller.controlEffort();
-        shoulder_x_controller.controlEffort();
+        shoulder_abduction_controller.controlEffort();
+        shoulder_flexion_controller.controlEffort();
     }
 
 }

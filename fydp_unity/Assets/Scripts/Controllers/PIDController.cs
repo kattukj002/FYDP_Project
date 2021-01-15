@@ -15,9 +15,9 @@ public class PIDController : DigitalController
     private float[] output_records = {0,0,0};
     private int curr_index = 2;
 
-    private float[] difference_coefficients = {0,0,0,0,0}
+    private float[] difference_coefficients = {0,0,0,0,0};
 
-    void PIDController(float in_p_gain, float in_i_gain, float in_d_gain, float in_sampling_period, 
+    public PIDController(float in_p_gain, float in_i_gain, float in_d_gain, float in_sampling_period, 
                         float in_derivative_roll_off_pole)
     {
         p_gain = in_p_gain;
@@ -26,11 +26,16 @@ public class PIDController : DigitalController
         sampling_period = in_sampling_period;
         derivative_roll_off_pole = in_derivative_roll_off_pole;
 
-        input_records = {0,0,0};
-        output_records = {0,0,0};
+        for ( int i = 0; i < input_records.Length; i++ )
+        {
+            input_records[i] = 0;
+            output_records[i] = 0;
+        }
+        
         curr_index = 2;
 
-        private int discretized_pole = Mathf.Exp(derivative_roll_off_pole*sampling_period);
+        float discretized_pole = Mathf.Exp(derivative_roll_off_pole*sampling_period);
+        
         difference_coefficients[0] = p_gain + d_gain;
         difference_coefficients[1] = -1 + i_gain*sampling_period+
                                     (d_gain - 1) * discretized_pole - d_gain;
@@ -44,14 +49,14 @@ public class PIDController : DigitalController
     {
         curr_index = (curr_index + 1) % 3;
 
-        input_buffer[curr_index] = input;
+        input_records[curr_index] = input;
 
-        input_buffer[curr_index] = difference_coefficients[0]*input_buffer[curr_index] +
-                                difference_coefficients[1]*input_buffer[(curr_index - 1) % 3] +
-                                difference_coefficients[2]*input_buffer[(curr_index - 2) % 3] +
-                                difference_coefficients[3]*output_buffer[(curr_index - 1) % 3] +
-                                difference_coefficients[4]*output_buffer[(curr_index - 2) % 3] +;
+        input_records[curr_index] = difference_coefficients[0]*input_records[curr_index] +
+                                difference_coefficients[1]*input_records[(curr_index - 1) % 3] +
+                                difference_coefficients[2]*input_records[(curr_index - 2) % 3] +
+                                difference_coefficients[3]*input_records[(curr_index - 1) % 3] +
+                                difference_coefficients[4]*input_records[(curr_index - 2) % 3];
 
-        return input_buffer[curr_index];
+        return input_records[curr_index];
     }
 }
