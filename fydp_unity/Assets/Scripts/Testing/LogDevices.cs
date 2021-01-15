@@ -15,7 +15,7 @@ public class LogDevices : MonoBehaviour
         {
             Debug.Log(item.name + item.characteristics);
         }
-        Debug.Log("Done");
+        Debug.Log("Finishd Listing all XR Devices");
     }
 
     // Update is called once per frame
