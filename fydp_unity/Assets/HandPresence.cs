@@ -20,29 +20,7 @@ public class HandPresence : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        List<InputDevice> devices = new List<InputDevice>();
-
-        InputDevices.GetDevicesWithCharacteristics(controllerCharacteristics, devices);
-
-        if (devices.Count > 0)
-        {
-            targetDevice = devices[0];
-            GameObject prefab = controllerPrefabs.Find(controller => controller.name == targetDevice.name);
-
-            if (prefab)
-            {
-                spawnedController = Instantiate(prefab, transform);
-            }
-            else
-            {
-                Debug.LogError("Did not find corresponding controller model");
-                spawnedController = Instantiate(controllerPrefabs[0], transform);
-            }
-
-            spawnedHandModel = Instantiate(handModelPrefab, transform);
-            handAnimator = spawnedHandModel.GetComponent<Animator>();
-        }
-
+        TryInitialize();
     }
 
     void UpdateHandAnimation()
@@ -69,19 +47,57 @@ public class HandPresence : MonoBehaviour
         }
     }
 
+    //Function to initialize everything
+    void TryInitialize()
+    {
+        List<InputDevice> devices = new List<InputDevice>();
+
+        InputDevices.GetDevicesWithCharacteristics(controllerCharacteristics, devices);
+
+        if (devices.Count > 0)
+        {
+            targetDevice = devices[0];
+            GameObject prefab = controllerPrefabs.Find(controller => controller.name == targetDevice.name);
+
+            if (prefab)
+            {
+                spawnedController = Instantiate(prefab, transform);
+            }
+            else
+            {
+                Debug.LogError("Did not find corresponding controller model");
+                spawnedController = Instantiate(controllerPrefabs[0], transform);
+            }
+
+            spawnedHandModel = Instantiate(handModelPrefab, transform);
+            handAnimator = spawnedHandModel.GetComponent<Animator>();
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if (showController)
+
+        //Check if there is a valid controller
+        if (!targetDevice.isValid)
         {
-            spawnedHandModel.SetActive(false);
-            spawnedController.SetActive(true);
+            TryInitialize();
         }
         else
         {
-            spawnedHandModel.SetActive(true);
-            spawnedController.SetActive(false);
-            UpdateHandAnimation();
+            if (showController)
+            {
+                spawnedHandModel.SetActive(false);
+                spawnedController.SetActive(true);
+            }
+            else
+            {
+                spawnedHandModel.SetActive(true);
+                spawnedController.SetActive(false);
+                UpdateHandAnimation();
+            }
         }
+
+        
     }
 }
