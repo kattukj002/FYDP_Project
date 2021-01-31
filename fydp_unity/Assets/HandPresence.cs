@@ -10,6 +10,36 @@ public class HandPresence : MonoBehaviour
     public List<GameObject> controllerPrefabs;
     public GameObject handModelPrefab;
 
+    //Define the Pose Class
+    public class Pose
+    {
+        private UnityEngine.Vector3 position;
+        private UnityEngine.Quaternion rotation;
+
+        //constructor
+        public Pose(UnityEngine.Vector3 position, UnityEngine.Quaternion rotation)
+        {
+            this.position = position;
+            this.rotation = rotation;
+        }
+        
+        public UnityEngine.Vector3 getPosition()
+        {
+            return this.position;
+        }
+
+        public UnityEngine.Quaternion getRotation()
+        {
+            return this.rotation;
+        }
+
+        public void logPoseData()
+        {
+            Debug.Log("Position: " + this.position);
+            Debug.Log("Rotation: " + this.rotation);
+        }
+    }
+
 
     private InputDevice targetDevice;
     private GameObject spawnedController;
@@ -56,6 +86,7 @@ public class HandPresence : MonoBehaviour
 
         if (devices.Count > 0)
         {
+
             targetDevice = devices[0];
             GameObject prefab = controllerPrefabs.Find(controller => controller.name == targetDevice.name);
 
@@ -74,10 +105,91 @@ public class HandPresence : MonoBehaviour
         }
     }
 
+    public Pose GetHeadPose()
+    {
+        InputDeviceCharacteristics headCharacteristics = InputDeviceCharacteristics.HeadMounted;
+        List<InputDevice> head_mounted = new List<InputDevice>();
+        InputDevices.GetDevicesWithCharacteristics(headCharacteristics, head_mounted);
+
+        if (head_mounted.Count > 0)
+        {
+            InputDevice head_device = head_mounted[0];
+            if (head_device.TryGetFeatureValue(CommonUsages.devicePosition, out UnityEngine.Vector3 position)
+                && head_device.TryGetFeatureValue(CommonUsages.deviceRotation, out UnityEngine.Quaternion rotation))
+            {
+                return new Pose(position, rotation);
+            }
+            else
+            {
+                Debug.LogError("Unable to get position and/or rotation of head mounted device");
+                return new Pose(new UnityEngine.Vector3(0, 0, 0), new UnityEngine.Quaternion(0, 0, 0, 0));
+            }
+        }
+        else
+        {
+            Debug.LogError("Unable to find a head mounted device");
+            return new Pose(new UnityEngine.Vector3(0, 0, 0), new UnityEngine.Quaternion(0, 0, 0, 0));
+        }
+    }
+
+    public Pose getLeftControllerPose()
+    {
+        InputDeviceCharacteristics leftControllerCharacteristics = InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.TrackedDevice | InputDeviceCharacteristics.Left;
+        List<InputDevice> left_controller_device  = new List<InputDevice>();
+        InputDevices.GetDevicesWithCharacteristics(leftControllerCharacteristics, left_controller_device);
+
+
+        if (left_controller_device.Count > 0)
+        {
+            InputDevice left_controller = left_controller_device[0];
+            if (left_controller.TryGetFeatureValue(CommonUsages.devicePosition, out UnityEngine.Vector3 position) &&
+                left_controller.TryGetFeatureValue(CommonUsages.deviceRotation, out UnityEngine.Quaternion rotation))
+            {
+                return new Pose(position, rotation);
+            }
+            else
+            {
+                Debug.LogError("Unable to get position and/or rotation of left controller");
+                return new Pose(new UnityEngine.Vector3(0, 0, 0), new UnityEngine.Quaternion(0, 0, 0, 0));
+            }
+        }
+        else
+        {
+            Debug.LogError("Unable to find a left controller");
+            return new Pose(new UnityEngine.Vector3(0, 0, 0), new UnityEngine.Quaternion(0, 0, 0, 0));
+        }
+    }
+
+    public Pose getRightControllerPose()
+    {
+        InputDeviceCharacteristics rightControllerCharacteristics = InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.TrackedDevice | InputDeviceCharacteristics.Right;
+        List<InputDevice> right_controller_device = new List<InputDevice>();
+        InputDevices.GetDevicesWithCharacteristics(rightControllerCharacteristics, right_controller_device);
+
+        if (right_controller_device.Count > 0)
+        {
+            InputDevice right_controller = right_controller_device[0];
+            if (right_controller.TryGetFeatureValue(CommonUsages.devicePosition, out UnityEngine.Vector3 position) &&
+                right_controller.TryGetFeatureValue(CommonUsages.deviceRotation, out UnityEngine.Quaternion rotation))
+            {
+                return new Pose(position, rotation);
+            }
+            else
+            {
+                Debug.LogError("Unable to get position and/or rotation of right controller");
+                return new Pose(new UnityEngine.Vector3(0, 0, 0), new UnityEngine.Quaternion(0, 0, 0, 0));
+            }
+        }
+        else
+        {
+            Debug.LogError("Unable to find a right controller");
+            return new Pose(new UnityEngine.Vector3(0, 0, 0), new UnityEngine.Quaternion(0, 0, 0, 0));
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
-
         //Check if there is a valid controller
         if (!targetDevice.isValid)
         {
@@ -95,9 +207,10 @@ public class HandPresence : MonoBehaviour
                 spawnedHandModel.SetActive(true);
                 spawnedController.SetActive(false);
                 UpdateHandAnimation();
+
+                Pose test = getRightControllerPose();
+                //test.logPoseData();
             }
         }
-
-        
     }
 }
