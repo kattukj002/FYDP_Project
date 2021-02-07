@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class HandPresence : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class HandPresence : MonoBehaviour
     public InputDeviceCharacteristics controllerCharacteristics;
     public List<GameObject> controllerPrefabs;
     public GameObject handModelPrefab;
+
+    private XRDirectInteractor interactor;
 
     //Define the Pose Class
     public class Pose
@@ -36,7 +39,7 @@ public class HandPresence : MonoBehaviour
         public void logPoseData()
         {
             Debug.Log("Position: " + this.position);
-            Debug.Log("Rotation: " + this.rotation);
+            //Debug.Log("Rotation: " + this.rotation);
         }
     }
 
@@ -51,6 +54,7 @@ public class HandPresence : MonoBehaviour
     void Start()
     {
         TryInitialize();
+        interactor = GetComponentInParent<XRDirectInteractor>();
     }
 
     void UpdateHandAnimation()
@@ -187,6 +191,17 @@ public class HandPresence : MonoBehaviour
         }
     }
 
+
+    void controllerGrabCallback(XRBaseInteractable interactable)
+    {
+
+        //TODO: need to make sure the type of the interactable is UnityEngine.XR.Interaction.Toolkit.XRGrabInteractable
+
+        List<Collider> colliderList = interactable.colliders;
+        Debug.Log("This is the list of colliders: " + colliderList[0].attachedRigidbody.mass);
+
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -210,6 +225,10 @@ public class HandPresence : MonoBehaviour
 
                 Pose test = getRightControllerPose();
                 //test.logPoseData();
+
+
+                interactor.onSelectEntered.AddListener(controllerGrabCallback);
+
             }
         }
     }
