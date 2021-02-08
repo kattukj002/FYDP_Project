@@ -15,19 +15,20 @@ public class PingUnity : MonoBehaviour
         arduino = new SerialPort(portName, 9600);
         arduino.ReadTimeout = 100;
         arduino.Open();
+
     }
 
     // Update is called once per frame
     void Update()
     {
-                StartCoroutine(
+         StartCoroutine(
             AsynchronousReadFromArduino
             (   (string s) => Debug.Log(s),     // Callback
                 () => Debug.LogError("Error!"), // Error callback
                 10000f                          // Timeout (milliseconds)
             )
-        );
- 
+        );        
+
     }
 
     public IEnumerator AsynchronousReadFromArduino(Action<string> callback, Action fail = null, float timeout = float.PositiveInfinity) {
@@ -36,7 +37,6 @@ public class PingUnity : MonoBehaviour
         TimeSpan diff = default(TimeSpan);
 
         string dataString = null;
-
         do {
             try {
                 dataString = arduino.ReadLine();

@@ -1,55 +1,73 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO.Ports;
+using FYDP.ArmBrace;
+using FYDP.Controllers;
 
 public class SimulationForce : MonoBehaviour
 {
-    public DigitalController elbow_controller;
-    public DigitalController shoulder_abduction_controller;
-    public DigitalController shoulder_flexion_controller;
+    private DigitalController _elbowController;
+    private DigitalController _shoulderAbductionController;
+    private DigitalController _shoulderFlexionController;
 
-    public float elbow_angle;
-    public float shoulder_flexion;
-    public float shoulder_abduction;
-    public float upper_arm_length;
-    public float lower_arm_length;
+    public float _elbowAngle;
+    public float _shoulderFlexion;
+    public float _shoulderAbduction;
+    public float _upperArmLength = 0.3f;
+    public float _lowerArmLength = 0.4f;
     
-    private Vector3 sim_force;
-    private float cached_mass = 0;
-    private Vector3 collision_force = new Vector3(0,0,0);
+    private Vector3 _simForce;
+    private float _cachedMass = 0f;
+    private Vector3 _collisionForce = new Vector3(0,0,0);
+    
+    public string arduinoPortName = "/dev/ttyACM0";
+    private ArmCmd ArmCmd;
 
-    // Start is called before the first frame update
     void Start()
     {
-        elbow_controller = new PIDController(5, 0.01f, 2, Time.fixedDeltaTime, -40);
-        shoulder_abduction_controller = new PIDController(5, 0.01f, 2, Time.fixedDeltaTime, -40);
-        shoulder_flexion_controller = new PIDController(5, 0.01f, 2, Time.fixedDeltaTime, -40);
+        _elbowController = new PidController(
+            pGain: 5, iGain: 0.01f, dGain: 2, 
+            samplingPeriod: Time.fixedDeltaTime, derivativeRollOffPole: -40);
+        _shoulderAbductionController = new PidController(
+            pGain: 5, iGain: 0.01f, dGain: 2, 
+            samplingPeriod: Time.fixedDeltaTime, derivativeRollOffPole: -40);
+        _shoulderFlexionController = new PidController(
+            pGain: 5, iGain: 0.01f, dGain: 2, 
+            samplingPeriod: Time.fixedDeltaTime, derivativeRollOffPole: -40);
 
-        if (TryGetComponent(out Rigidbody found_rigid_body))
-        {
-            cached_mass = found_rigid_body.mass;
-        }
+        SerialPort arduinoPort = new SerialPort("/dev/ttyACM0");
+        arduinoPort.WriteTimeout = 1;
+        arduinoPort.ReadTimeout = 1;
+
+        ArmCmd = new ArmCmd(arduinoPort);
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
-        sim_force = Physics.gravity*cached_mass + collision_force;
-        applyForces(sim_force);
-        collision_force.Set(0,0,0);
+        _simForce = Physics.gravity*_cachedMass + _collisionForce;
+        //CalcJointTorques(_simForce);
+        //applyTorques();
+        _collisionForce.Set(0,0,0);
     }
 
     void OnCollisionEnter(Collision collision)
     {
         //Assume all collisions happen over one Time.fixedDeltaTime unit.
-        collision_force = collision.impulse/Time.fixedDeltaTime;
+        _collisionForce = collision.impulse/Time.fixedDeltaTime;
     }
 
-    void applyForces(Vector3 force)
+    void applyTorques(float elbowTorque, float shoulderAbductionTorque, 
+                      float shoulderFlexionTorque)
     {
-        elbow_controller.controlEffort();
-        shoulder_abduction_controller.controlEffort();
-        shoulder_flexion_controller.controlEffort();
+        ArmCmd.elbow.SetTorque(_elbowController.controlEffort(elbowTorque));
+        ArmCmd.shoulderAbduction.SetTorque(
+            _shoulderAbductionController.controlEffort(shoulderAbductionTorque));
+        
+        ArmCmd.shoulderFlexion.SetTorque( 
+            _shoulderFlexionController.controlEffort(shoulderFlexionTorque));
+
+        ArmCmd.Send();
     }
 
 }
