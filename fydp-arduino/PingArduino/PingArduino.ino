@@ -6,12 +6,12 @@ void setup(){
 }
 void loop(){
   ledState = recvSerial();
-  delay(10);
   if (ledState == 1){
     digitalWrite(LED_BUILTIN, HIGH);
   } else {
     digitalWrite(LED_BUILTIN, LOW);
   }
+  delay(10);
 }
 
 int recvSerial() {
