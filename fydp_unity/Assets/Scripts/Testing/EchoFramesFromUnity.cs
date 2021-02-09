@@ -20,21 +20,20 @@ public class EchoFramesFromUnity : MonoBehaviour
         armCmd.elbow.SetTorque(1f);
         armCmd.shoulderAbduction.SetTorque(2f);
         armCmd.shoulderFlexion.SetTorque(3f);
-        //StartCoroutine(SpacedWrite());   
+        StartCoroutine(SpacedWrite());   
     }
 
     void Update() {
         
     }
-    public IEnumerator SpacedWrite() {
+    public IEnumerator SpacedWrite(int waitSeconds) {
         int i = 0;
         while (true){
-            Debug.Log("Sent " + i.ToString());
+            armCmd.Send();
+            Debug.Log(i);
             i+=1;
-            yield return null;
+            yield return new WaitForSeconds(waitSeconds);;
         }
-        //armCmd.Send();
-        //yield return new WaitForSeconds(waitSeconds);
     }
     
 }
