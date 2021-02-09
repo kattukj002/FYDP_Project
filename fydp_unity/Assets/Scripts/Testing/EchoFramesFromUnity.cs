@@ -8,19 +8,19 @@ public class EchoFramesFromUnity : MonoBehaviour
 {
     public string portName = "/dev/ttyACM0";
     private SerialPort arduino;
-    private ArmCmd armCmd;
+    private BraceCmd armCmd;
     
     void Start() {
         arduino = new SerialPort(portName, 9600);
         arduino.WriteTimeout = SerialPort.InfiniteTimeout;
         arduino.Open();
 
-        armCmd = new ArmCmd(arduino);
+        armCmd = new BraceCmd(arduino);
         
         armCmd.elbow.SetTorque(1f);
         armCmd.shoulderAbduction.SetTorque(2f);
         armCmd.shoulderFlexion.SetTorque(3f);
-        StartCoroutine(SpacedWrite());   
+        StartCoroutine(SpacedWrite(1));   
     }
 
     void Update() {

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace FYDP {
-    namespace ArmBrace {
-        public class MotorCmd {
+    namespace ArmBrace{
+        public class MotorCmdFormat {
             public enum CmdTypeId {
                 NoCmd = 0b_0000_0000,
                 SetTorqueCW = 0b_0000_0010,
@@ -18,7 +18,7 @@ namespace FYDP {
             //Augment this function with more adv. algorithm for more precision
             private byte EncodeTorque(float torque) {
                 return (byte)System.Math.Round(System.Math.Abs(torque), 0, 
-                                  System.MidpointRounding.AwayFromZero);
+                                    System.MidpointRounding.AwayFromZero);
             }
 
             private float DecodeTorque(byte torque) {
@@ -38,9 +38,9 @@ namespace FYDP {
 
                 if ((headerBits & encodedTorque) > 0) {
                     Debug.Log("Motor command torque exceeds the maximum " + 
-                              "magnitude " + 
-                              DecodeTorque(maxEncodableTorque).ToString() + 
-                              "N-m, max torque applied instead.");
+                                "magnitude " + 
+                                DecodeTorque(maxEncodableTorque).ToString() + 
+                                "N-m, max torque applied instead.");
                         
                     Data = maxEncodableTorque;
                 } else {
