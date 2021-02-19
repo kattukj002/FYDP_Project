@@ -38,8 +38,8 @@ namespace FYDP {
                     _readThread.Join();   
                 }
             }
-            public bool GetJointAngles(out uint elbowAngleDeg, 
-                out uint shoulderAbductionDeg, out uint shoulderFlexionDeg) {
+            public bool GetJointAngles(out int elbowAngleDeg, 
+                out int shoulderAbductionDeg, out int shoulderFlexionDeg) {
                 
                 if(_readBufferIndexMutex.WaitOne(1)) {
                     elbowAngleDeg = 
@@ -107,7 +107,7 @@ namespace FYDP {
             private int _frameSize;
             private byte _frameStart;
             private uint _readBufferIndex = 0; 
-            private uint[,] _jointAngleBuffers = new uint[2,3];
+            private int[,] _jointAngleBuffers = new int[2,3];
             private Thread _readThread = null;
             private Mutex _readBufferIndexMutex;
             private bool _stopThreadNeatly;
