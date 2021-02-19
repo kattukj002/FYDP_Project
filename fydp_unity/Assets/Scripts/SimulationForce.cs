@@ -28,6 +28,8 @@ public class SimulationForce : MonoBehaviour
     private BraceCmd _armCmd;
     private ArmVectorModel _armModel;
     private MotionEstimator motionEstimator;
+    public bool _debug = false;
+    public Vector3 _rightControllerLocation;
 
     void Start()
     {
@@ -41,19 +43,31 @@ public class SimulationForce : MonoBehaviour
             pGain: 5, iGain: 0.01f, dGain: 2, 
             samplingPeriod: Time.fixedDeltaTime, derivativeRollOffPole: -40);
 
-        SerialPort arduinoPort = new SerialPort("/dev/ttyACM0");
-        
-        //Will need to look into the correct values for this.
-        arduinoPort.WriteTimeout = 1;
-        arduinoPort.ReadTimeout = 1;
-        arduinoPort.ReadBufferSize = 16;
-        arduinoPort.WriteBufferSize = 16;
+        SerialPort arduinoPort = null;
 
         XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
         controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
         controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
-        _armCmd = new BraceCmd(arduinoPort);
 
+        if(!_debug) {
+            arduinoPort = new SerialPort("/dev/ttyACM0");
+        
+            //Will need to look into the correct values for this.
+            arduinoPort.WriteTimeout = 1;
+            arduinoPort.ReadTimeout = 1;
+            arduinoPort.ReadBufferSize = 16;
+            arduinoPort.WriteBufferSize = 16;
+
+
+            _armCmd = new BraceCmd(arduinoPort);
+
+            if(!VRUtils.TryGetInputDevice(
+                VRUtils.DeviceId.RightController, out _rightController)) {
+                
+                Debug.Log("Could not access right controller.");
+            }
+        }
+        
         ArmVectorModel.OffsetPolarVector shoulderOffsetFromNeckBase = new ArmVectorModel.OffsetPolarVector();
         shoulderOffsetFromNeckBase.Length = 0.1f;
         shoulderOffsetFromNeckBase.Rotation = Quaternion.AngleAxis(90, Vector3.right);
@@ -61,15 +75,10 @@ public class SimulationForce : MonoBehaviour
         neckBaseOffsetFromHeadset.Length = 0.2f;
         neckBaseOffsetFromHeadset.Rotation = Quaternion.AngleAxis(90, Vector3.right);
 
-        if(!VRUtils.TryGetInputDevice(
-            VRUtils.DeviceId.RightController, out _rightController)) {
-            
-            Debug.Log("Could not access right controller.");
-        }
         _armModel = new ArmVectorModel(new BraceSensorReader(arduinoPort),
                 upperArmLength: UpperArmLength, lowerArmLength: LowerArmLength, 
                 shoulderOffsetFromNeckBase: shoulderOffsetFromNeckBase, 
-                neckBaseOffsetFromHeadset: neckBaseOffsetFromHeadset);
+                neckBaseOffsetFromHeadset: neckBaseOffsetFromHeadset, debug:_debug);
 
         motionEstimator = new MotionEstimator(Time.fixedDeltaTime);
     }
@@ -88,8 +97,16 @@ public class SimulationForce : MonoBehaviour
 
     void FixedUpdate()
     {
-        bool couldReadRightController = _rightController.TryGetFeatureValue(
-            CommonUsages.devicePosition, out Vector3 rightControllerLocation);
+        bool couldReadRightController;
+        Vector3 rightControllerLocation;
+        if (!_debug) {
+            couldReadRightController = _rightController.TryGetFeatureValue(
+                CommonUsages.devicePosition, out rightControllerLocation);
+        } else {
+            couldReadRightController = true;
+            rightControllerLocation = _rightControllerLocation;
+        }
+        
 
         if(couldReadRightController){
             motionEstimator.UpdateNewPosition(rightControllerLocation);
@@ -98,6 +115,10 @@ public class SimulationForce : MonoBehaviour
         }
 
         _simForce = Physics.gravity*_cachedMass + _collisionForce;
+        
+        if(_debug) {
+            Debug.Log("SIM_FORCE = " + _simForce);
+        }
 
         if (_cachedMass > 0){
             // The "magic product" is the inertial force, may need to be modified.
@@ -105,16 +126,19 @@ public class SimulationForce : MonoBehaviour
                 _cachedMass / (ArmMass + _cachedMass);
         }
 
-        if(_armModel.CalculateJointTorques(forceAtHand: _simForce,
-                rightControllerLocation, out float elbowTorque, 
-                out float shoulderAbductionTorque, 
-                out float shoulderFlexionTorque)) {
-            
-            applyTorques(elbowTorque, 
-                         shoulderAbductionTorque, 
-                         shoulderFlexionTorque);
-            _collisionForce.Set(0,0,0);
+        if(!_debug) {
+            if(_armModel.CalculateJointTorques(forceAtHand: _simForce,
+                    rightControllerLocation, out float elbowTorque, 
+                    out float shoulderAbductionTorque, 
+                    out float shoulderFlexionTorque)) {
+                
+                applyTorques(elbowTorque, 
+                            shoulderAbductionTorque, 
+                            shoulderFlexionTorque);
+                _collisionForce.Set(0,0,0);
+            }
         }
+        
     }
 
     void OnCollisionEnter(Collision collision){

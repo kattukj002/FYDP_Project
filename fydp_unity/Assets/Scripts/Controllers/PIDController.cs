@@ -46,15 +46,15 @@ namespace FYDP {
 
             public override float controlEffort(float input=0)
             {
-                _currRecordIndex = (_currRecordIndex + 1) % 3;
+                _currRecordIndex = ((_currRecordIndex + 3) - 1) % 3;
 
                 _inputRecords[_currRecordIndex] = input;
 
                 _inputRecords[_currRecordIndex] = _differenceCoefficients[0]*_inputRecords[_currRecordIndex] +
-                                        _differenceCoefficients[1]*_inputRecords[(_currRecordIndex - 1) % 3] +
-                                        _differenceCoefficients[2]*_inputRecords[(_currRecordIndex - 2) % 3] +
-                                        _differenceCoefficients[3]*_inputRecords[(_currRecordIndex - 1) % 3] +
-                                        _differenceCoefficients[4]*_inputRecords[(_currRecordIndex - 2) % 3];
+                                        _differenceCoefficients[1]*_inputRecords[(_currRecordIndex + 1) % 3] +
+                                        _differenceCoefficients[2]*_inputRecords[(_currRecordIndex + 2) % 3] +
+                                        _differenceCoefficients[3]*_inputRecords[(_currRecordIndex + 1) % 3] +
+                                        _differenceCoefficients[4]*_inputRecords[(_currRecordIndex + 2) % 3];
 
                 return _inputRecords[_currRecordIndex];
             }

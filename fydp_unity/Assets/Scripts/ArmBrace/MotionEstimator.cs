@@ -9,17 +9,16 @@ namespace FYDP {
         class MotionEstimator {
             private Vector3[] _positionMemory;
             private int _currIndex;
-            private int _positionMemoryLength;
+            public const int _positionMemoryLength = 3;
             private float _timestepSeconds;
 
             public MotionEstimator(float timestepSeconds) {
-                _positionMemoryLength = 3;
-                _positionMemory = new Vector3[_positionMemoryLength];
+                _positionMemory = new Vector3[_positionMemoryLength] {new Vector3(0,0,0), new Vector3(0,0,0), new Vector3(0,0,0)};
                 _currIndex = 0;
                 _timestepSeconds = timestepSeconds;
             }
             public void UpdateNewPosition(Vector3 position){
-                _currIndex = (_currIndex + 1) % _positionMemoryLength;
+                _currIndex = ((_currIndex + _positionMemoryLength) - 1) % _positionMemoryLength;
                 _positionMemory[_currIndex] = position;
             }
             // If no input, assume the arm has stayed stationary. Add a 
@@ -32,14 +31,14 @@ namespace FYDP {
             // techniques if necessary.
             public Vector3 EstimateAcceleration(){
                 return (_positionMemory[_currIndex] - 
-                    2*_positionMemory[(_currIndex - 1) % _positionMemoryLength] +
-                    _positionMemory[(_currIndex - 2) % _positionMemoryLength]) /
+                    2*_positionMemory[(_currIndex + 1) % _positionMemoryLength] +
+                    _positionMemory[(_currIndex + 2) % _positionMemoryLength]) /
                     _timestepSeconds/_timestepSeconds;
             }
 
             public Vector3 EstimateVelocity(){
                 return (_positionMemory[_currIndex] - 
-                    _positionMemory[(_currIndex - 1) % _positionMemoryLength])/
+                    _positionMemory[(_currIndex + 1) % _positionMemoryLength])/
                     _timestepSeconds;
             }
 
