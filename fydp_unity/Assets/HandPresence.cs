@@ -198,7 +198,7 @@ public class HandPresence : MonoBehaviour
         //TODO: need to make sure the type of the interactable is UnityEngine.XR.Interaction.Toolkit.XRGrabInteractable
 
         List<Collider> colliderList = interactable.colliders;
-        Debug.Log("This is the list of colliders: " + colliderList[0].attachedRigidbody.mass);
+        //Debug.Log("This is the list of colliders: " + colliderList[0].attachedRigidbody.mass);
 
     }
 
