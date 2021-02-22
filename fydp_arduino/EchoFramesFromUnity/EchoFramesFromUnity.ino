@@ -1,4 +1,3 @@
-//
 const int header_len = 1;
 const int msg_len = 6;
 byte frameHeader[header_len] = {0xC0};
@@ -22,7 +21,7 @@ void loop(){
       Serial.print('\n');
     }
   
-    if (curr_header_idx == 2) {
+    if (curr_header_idx == header_len) {
       curr_header_idx = 0;
       Serial.readBytesUntil((char)0xC0, msg, msg_len);
   
