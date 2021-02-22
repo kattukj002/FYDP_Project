@@ -27,21 +27,21 @@ public class EchoFramesFromArduino : MonoBehaviour
         sensorReader.StartAsyncSensorReads();
         printThread = new Thread(this.PrintSensorData);
         printThread.Start();
-        EditorApplication.playmodeStateChanged = () => {
-            if(EditorApplication.isPaused){
+        EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
+            if(state == PlayModeStateChange.ExitingPlayMode){
                 sensorReader.StopAsyncSensorReads();
                 this.EndThreads();
             }
         };
     }
-    void OnApplicationQuit(){
+    void OnApplicationQuit() {
         EndThreads();
     }
     void EndThreads() {
         quitPrints = true;
         printThread.Join();
     }
-    void PrintSensorData(){
+    void PrintSensorData() {
         while(!quitPrints) {
             bool successfulRead = sensorReader.GetJointAngles(
                 out int elbowAngleDeg, out int shoulderAbductionDeg, 
@@ -56,10 +56,5 @@ public class EchoFramesFromArduino : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKey("1")){
-            sensorReader.StopAsyncSensorReads();
-        } else if (Input.GetKey("2")) {
-            sensorReader.StartAsyncSensorReads();
-        }
     }
 }

@@ -81,12 +81,6 @@ namespace FYDP {
                         try{
                             bytesRead = _arduinoPort.Read(
                                 buffer, 0, _frameSize);
-                            byte[] by = new byte[bytesRead];
-                            
-                            for(int i = 0; i < bytesRead; i++) {
-                                by[i] =  buffer[i];
-                            }
-                            Debug.Log("RECEIVED: " + BitConverter.ToString(by);
                         } catch (TimeoutException) {
                             continue;
                         }
@@ -118,7 +112,6 @@ namespace FYDP {
                             if(_readBufferIndexMutex.WaitOne(1)) {
                                 _readBufferIndex ^= 1;
                                 writeBufferIndex = _readBufferIndex ^ 1;
-                                Debug.Log("WRITE, _readBufferIndex: " + _readBufferIndex.ToString());
                                 _readBufferIndexMutex.ReleaseMutex();
                                 currFrameByte = 0;
                             }
