@@ -1,6 +1,6 @@
-const int header_len = 1;
+const int header_len = 2;
 const int msg_len = 6;
-byte frameHeader[header_len] = {0xC0};
+byte frameHeader[header_len] = {0xC0, 0xC0};
 byte msg[msg_len];
 int curr_header_idx = 0;
 

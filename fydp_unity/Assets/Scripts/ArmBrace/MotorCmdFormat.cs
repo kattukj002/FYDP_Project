@@ -5,15 +5,18 @@ using UnityEngine;
 namespace FYDP {
     namespace ArmBrace{
         public class MotorCmdFormat {
+            //enum values taken from the Arduino motor code
             public enum CmdTypeId {
                 NoCmd = 0b_0000_0000,
-                SetTorqueCW = 0b_0000_0010,
-                SetTorqueCCW = 0b_0000_0100,
-                HoldAngle = 0b_0000_1000
+                NoTorque = 1,
+                SetTorqueCW = 2,
+                SetTorqueCCW = 3,
+                HoldTorque = 4
             }
 
             public CmdTypeId Id {get; private set;}
             public byte Data {get; private set;}
+            
 
             //Augment this function with more adv. algorithm for more precision
             private byte EncodeTorque(float torque) {

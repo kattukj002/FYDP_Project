@@ -12,7 +12,7 @@ public class ArmVectorModel_test : MonoBehaviour
     public Vector3 forceAtHand = Vector3.down*9.81f;
     public Vector3 rightControllerLocation = new Vector3(-0.5f, -0.4899f, 0f); 
     
-    public int _elbowAngleDeg = 90, _shoulderAbductionDeg = 90, _shoulderFlexionDeg = 0;
+    public int _elbowDeg = 90, _shoulderAbductionDeg = 90, _shoulderFlexionDeg = 0;
     public Vector3 _headsetPosition = new Vector3(0, 0, 0.3f);
     public Vector3 headSetFromDirection = Vector3.forward;
     public Vector3 headSetToDirection = Vector3.forward;
@@ -47,7 +47,7 @@ public class ArmVectorModel_test : MonoBehaviour
         armVectorModel._headsetRotation = new Quaternion(0,0,0,0);
         armVectorModel._headsetRotation.SetFromToRotation(headSetFromDirection, headSetToDirection);
         armVectorModel._headsetPosition = _headsetPosition;
-        armVectorModel._elbowAngleDeg = _elbowAngleDeg;
+        armVectorModel._elbowDeg = _elbowDeg;
         armVectorModel._shoulderAbductionDeg = _shoulderAbductionDeg;
         armVectorModel._shoulderFlexionDeg = _shoulderFlexionDeg;
 

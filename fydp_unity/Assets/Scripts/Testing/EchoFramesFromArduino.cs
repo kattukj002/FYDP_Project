@@ -16,12 +16,12 @@ public class EchoFramesFromArduino : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        arduinoPort = new SerialPort(portName, 9600);
+        arduinoPort = new SerialPort(portName, 115200);
         arduinoPort.ReadTimeout = 10;
         arduinoPort.WriteTimeout = 1;
         arduinoPort.ReadTimeout = 1;
-        arduinoPort.ReadBufferSize = 8;
-        arduinoPort.WriteBufferSize = 8;
+        arduinoPort.ReadBufferSize = 24;
+        arduinoPort.WriteBufferSize = 24;
 
         sensorReader = new BraceSensorReader(arduinoPort);
         sensorReader.StartAsyncSensorReads();
@@ -29,7 +29,6 @@ public class EchoFramesFromArduino : MonoBehaviour
         printThread.Start();
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){
-                sensorReader.StopAsyncSensorReads();
                 this.EndThreads();
             }
         };
@@ -39,22 +38,19 @@ public class EchoFramesFromArduino : MonoBehaviour
     }
     void EndThreads() {
         quitPrints = true;
+        sensorReader.StopAsyncSensorReads();
         printThread.Join();
     }
     void PrintSensorData() {
         while(!quitPrints) {
             bool successfulRead = sensorReader.GetJointAngles(
-                out int elbowAngleDeg, out int shoulderAbductionDeg, 
-                out int shoulderFlexionDeg);
+                out float elbowAngleDeg, out float shoulderAbductionDeg, 
+                out float shoulderFlexionDeg);
             Debug.Log("Successful Read: " + successfulRead.ToString() + 
                     ", elbow angle: " + elbowAngleDeg.ToString() + " deg, "  + 
                     "shoulder abduction angle: " + 
                     shoulderAbductionDeg.ToString() + " deg, shoulder flexion " + 
                     "angle: " + shoulderFlexionDeg + " deg");
         }
-    }
-    // Update is called once per frame
-    void Update()
-    {
     }
 }
