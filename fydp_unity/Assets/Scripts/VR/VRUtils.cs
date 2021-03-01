@@ -10,10 +10,10 @@ namespace FYDP {
                 Headset = (int)InputDeviceCharacteristics.HeadMounted,
                 LeftController = (int)(InputDeviceCharacteristics.Controller | 
                         InputDeviceCharacteristics.TrackedDevice | 
-                        InputDeviceCharacteristics.Right),
+                        InputDeviceCharacteristics.Left),
                 RightController  = (int)(InputDeviceCharacteristics.Controller | 
                         InputDeviceCharacteristics.TrackedDevice | 
-                        InputDeviceCharacteristics.Left)
+                        InputDeviceCharacteristics.Right)
             }
 
             public static bool TryGetInputDevice(
