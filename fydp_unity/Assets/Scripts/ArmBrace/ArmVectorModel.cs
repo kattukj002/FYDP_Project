@@ -45,6 +45,7 @@ namespace FYDP {
                     _braceSensorReader.StartAsyncSensorReads();
                 }
             }
+
             public bool CalculateJointTorques(Vector3 forceAtHand, 
                 Vector3 rightControllerLocation, 
                 out float elbowTorque, out float shoulderAbductionTorque, 
@@ -63,15 +64,19 @@ namespace FYDP {
                     out Vector3 rightShoulderAxisVector, 
                     out Vector3 forwardAxisVector);
 
-                if(!_debug && (!_braceSensorReader.GetJointAngles(
+                if(!_debug){
+                    bool couldGetAngles = _braceSensorReader.GetJointAngles(
                         out elbowDeg, out shoulderAbductionDeg, 
-                        out shoulderFlexionDeg) || 
-                    !couldCalcShoulderJoint)) {
-
+                        out shoulderFlexionDeg);
+                    
+                    if (!couldGetAngles || !couldCalcShoulderJoint) {
                         Debug.Log("Could not read from the devices.");
                         return false;
+                    } 
                 }      
-                    
+                Debug.Log("ELBOW_DEG: " + elbowDeg.ToString());
+                Debug.Log("SHOULDER_ABDUCTION_DEG: " + shoulderAbductionDeg.ToString());
+                Debug.Log("SHOULDER_FLEXION_DEG: " + shoulderFlexionDeg.ToString());
                 Vector3 shoulderMomentArm = rightControllerLocation -  
                                             shoulderLocation;
 
@@ -93,7 +98,8 @@ namespace FYDP {
                     Quaternion.AngleAxis(shoulderAbductionDeg, 
                         forwardAxisVector) * 
                     (_upperArmLength * rightShoulderAxisVector);
-                
+                Debug.Log("upperArmVector: " + upperArmVector.ToString());
+
                 Vector3 elbowLocation = upperArmVector + shoulderLocation;
                 
                 // Use saved arm length instead of controller location 
@@ -102,9 +108,13 @@ namespace FYDP {
                     _lowerArmLength * 
                     (rightControllerLocation - elbowLocation).normalized;
                 
+                Debug.Log("lowerArmVector: " + lowerArmVector.ToString());
+
                 Vector3 elbowAxisVector = Vector3.Cross(
                     lowerArmVector, upperArmVector).normalized;
                 
+                Debug.Log("elbowAxisVector: " + elbowAxisVector.ToString());
+
                 elbowTorque = Vector3.Dot(
                     Vector3.Cross(lowerArmVector, forceAtHand), 
                     elbowAxisVector);

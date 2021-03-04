@@ -7,6 +7,7 @@ using System.IO.Ports;
 using FYDP.ArmBrace;
 using FYDP.Controllers;
 using FYDP.VR;
+using UnityEditor;
 
 public class SimulationForce : MonoBehaviour
 {
@@ -24,13 +25,14 @@ public class SimulationForce : MonoBehaviour
     public float _cachedMass = 0f;
     private Vector3 _collisionForce = new Vector3(0,0,0);
     
-    public string arduinoPortName = "/dev/ttyACM0";
+    public string ArduinoPortName = "COM4";
+    public int ArduinoBaudRate = 115200;
     private BraceCmd _armCmd;
     private ArmVectorModel _armModel;
     private MotionEstimator motionEstimator;
     public bool _debug = false;
     public Vector3 _rightControllerLocation;
-
+    private SerialPort _arduinoPort;
     void Start()
     {
         _elbowController = new PidController(
@@ -43,23 +45,21 @@ public class SimulationForce : MonoBehaviour
             pGain: 5, iGain: 0.01f, dGain: 2, 
             samplingPeriod: Time.fixedDeltaTime, derivativeRollOffPole: -40);
 
-        SerialPort arduinoPort = null;
-
         XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
         controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
         controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
 
         if(!_debug) {
-            arduinoPort = new SerialPort("/dev/ttyACM0");
+            _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
         
             //Will need to look into the correct values for this.
-            arduinoPort.WriteTimeout = 1;
-            arduinoPort.ReadTimeout = 1;
-            arduinoPort.ReadBufferSize = 16;
-            arduinoPort.WriteBufferSize = 16;
+            _arduinoPort.WriteTimeout = 1;
+            _arduinoPort.ReadTimeout = 1;
+            _arduinoPort.ReadBufferSize = 16;
+            _arduinoPort.WriteBufferSize = 16;
 
 
-            _armCmd = new BraceCmd(arduinoPort);
+            _armCmd = new BraceCmd(_arduinoPort);
 
             if(!VRUtils.TryGetInputDevice(
                 VRUtils.DeviceId.RightController, out _rightController)) {
@@ -75,13 +75,30 @@ public class SimulationForce : MonoBehaviour
         neckBaseOffsetFromHeadset.Length = 0.2f;
         neckBaseOffsetFromHeadset.Rotation = Quaternion.AngleAxis(90, Vector3.right);
 
-        _armModel = new ArmVectorModel(new BraceSensorReader(arduinoPort),
+        _armModel = new ArmVectorModel(new BraceSensorReader(_arduinoPort),
                 upperArmLength: UpperArmLength, lowerArmLength: LowerArmLength, 
                 shoulderOffsetFromNeckBase: shoulderOffsetFromNeckBase, 
                 neckBaseOffsetFromHeadset: neckBaseOffsetFromHeadset, debug:_debug);
 
         motionEstimator = new MotionEstimator(Time.fixedDeltaTime);
+
+        EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
+            if(state == PlayModeStateChange.ExitingPlayMode){
+                this.ReleaseResources();
+            }
+        };
     }
+    ~SimulationForce(){
+        ReleaseResources();
+        Debug.Log("Ended Simulation Forces Script");
+    }
+    void OnApplicationQuit() {
+        ReleaseResources();
+    }
+    void ReleaseResources() {
+        _arduinoPort.Close();
+    }
+
 
     void GetHeldObjectMass(XRBaseInteractable interactable){
 
@@ -132,6 +149,10 @@ public class SimulationForce : MonoBehaviour
                     out float shoulderAbductionTorque, 
                     out float shoulderFlexionTorque)) {
                 
+                Debug.Log("SIM_ELBOW_TORQUE = " + elbowTorque.ToString());
+                Debug.Log("SIM_SHOULDER_ABDUCTION_TORQUE = " + shoulderAbductionTorque.ToString());
+                Debug.Log("SIM_SHOULDER_FLEXION_TORQUE = " + shoulderFlexionTorque.ToString());
+
                 applyTorques(elbowTorque, 
                             shoulderAbductionTorque, 
                             shoulderFlexionTorque);
@@ -155,11 +176,9 @@ public class SimulationForce : MonoBehaviour
     void applyTorques(float elbowTorque, float shoulderAbductionTorque, 
                       float shoulderFlexionTorque)
     {
-        _armCmd.elbow.SetTorque(_elbowController.controlEffort(elbowTorque));
-        _armCmd.shoulderAbduction.SetTorque(
-            _shoulderAbductionController.controlEffort(shoulderAbductionTorque));
-        _armCmd.shoulderFlexion.SetTorque( 
-            _shoulderFlexionController.controlEffort(shoulderFlexionTorque));
+        _armCmd.elbow.SetTorque(elbowTorque);
+        _armCmd.shoulderAbduction.SetTorque(shoulderAbductionTorque);
+        _armCmd.shoulderFlexion.SetTorque(shoulderFlexionTorque);
 
         _armCmd.Send();
     }

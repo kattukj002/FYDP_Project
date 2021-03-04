@@ -9,14 +9,15 @@ using System;
 
 public class EchoFramesFromUnity : MonoBehaviour
 {
-    public string portName = "/dev/ttyACM0";
+    public string PortName = "COM4";
+    public int BaudRate = 115200; 
     private SerialPort arduino;
     private BraceCmd armCmd;
     private Thread sendThread;
     private bool quitThread = false;
 
     void Start() {
-        arduino = new SerialPort(portName, 115200);
+        arduino = new SerialPort(PortName, BaudRate);
         arduino.WriteTimeout = SerialPort.InfiniteTimeout;
         arduino.Open();
 

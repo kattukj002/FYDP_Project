@@ -10,13 +10,14 @@ public class EchoFramesFromArduino : MonoBehaviour
 {
     private BraceSensorReader sensorReader;
     SerialPort arduinoPort;
-    public string portName = "/dev/ttyACM0";
+    public string PortName = "COM4";
+    public int BaudRate = 115200;
     private Thread printThread; 
     private bool quitPrints = false;
     // Start is called before the first frame update
     void Start()
     {
-        arduinoPort = new SerialPort(portName, 115200);
+        arduinoPort = new SerialPort(PortName, BaudRate);
         arduinoPort.ReadTimeout = 10;
         arduinoPort.WriteTimeout = 1;
         arduinoPort.ReadTimeout = 1;

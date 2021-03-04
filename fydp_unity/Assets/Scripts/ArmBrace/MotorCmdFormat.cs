@@ -31,9 +31,12 @@ namespace FYDP {
                 byte headerBits = 0xC0;
                 byte maxEncodableTorque = (byte)(~headerBits);
                 
-                if (torque > 0) {
+                if (torque == 0) {
+                    Id = CmdTypeId.NoTorque;
+                } else if (torque > 0) {
                     Id = CmdTypeId.SetTorqueCCW;
-                } else {
+                }  
+                else {
                     Id = CmdTypeId.SetTorqueCW;
                 }
 
@@ -47,7 +50,7 @@ namespace FYDP {
                         
                     Data = maxEncodableTorque;
                 } else {
-                    Data = encodedTorque;
+                    Data = (byte)(encodedTorque + 8);
                 }
             }
 

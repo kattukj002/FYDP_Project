@@ -27,7 +27,7 @@ namespace FYDP {
             }
 
             private float DecodeAngleBytes(byte msb, byte lsb) {
-                return (((msb << 8) | lsb) * 180/(float)Int16.MaxValue);
+                return (float)(((msb << 8) | lsb) * 100/4096.0);
             }
 
             private void ProcessInputByteArray(
