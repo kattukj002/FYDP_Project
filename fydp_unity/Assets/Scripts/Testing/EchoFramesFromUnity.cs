@@ -2,16 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO.Ports;
+using System.Threading; 
 using FYDP.ArmBrace;
+using UnityEditor;
+using System;
 
 public class EchoFramesFromUnity : MonoBehaviour
 {
     public string portName = "/dev/ttyACM0";
     private SerialPort arduino;
     private BraceCmd armCmd;
-    
+    private Thread sendThread;
+    private bool quitThread = false;
+
     void Start() {
-        arduino = new SerialPort(portName, 9600);
+        arduino = new SerialPort(portName, 115200);
         arduino.WriteTimeout = SerialPort.InfiniteTimeout;
         arduino.Open();
 
@@ -19,21 +24,37 @@ public class EchoFramesFromUnity : MonoBehaviour
         
         armCmd.elbow.SetTorque(1f);
         armCmd.shoulderAbduction.SetTorque(2f);
-        armCmd.shoulderFlexion.SetTorque(3f);
-        StartCoroutine(SpacedWrite(1));   
+        armCmd.shoulderFlexion.SetTorque(3f);   
+        
+        EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
+            if(state == PlayModeStateChange.ExitingPlayMode){
+                this.EndThreads();
+            }
+        };
+        sendThread = new Thread(this.TxThreadFcn);
+        sendThread.Start();
     }
 
-    void Update() {
-        
+    void OnApplicationQuit() {
+        EndThreads();
     }
-    public IEnumerator SpacedWrite(int waitSeconds) {
-        int i = 0;
-        while (true){
-            armCmd.Send();
-            Debug.Log(i);
-            i+=1;
-            yield return new WaitForSeconds(waitSeconds);;
+    void EndThreads() {
+        quitThread = true;
+        sendThread.Join();
+    }
+
+    //Changed to thread b/c of Oculus libraries stopping program with exceptions otherwise.
+    void TxThreadFcn() {
+        DateTime startTime = DateTime.Now;
+        TimeSpan interval = TimeSpan.FromMilliseconds(1000);
+
+        while(!quitThread) {
+            if ((DateTime.Now - startTime) >= interval) {
+                Debug.Log("SENT");
+                armCmd.Send();
+                startTime = DateTime.Now;
+            }
         }
+        Debug.Log("QUIT");
     }
-    
 }

@@ -15,7 +15,7 @@ namespace FYDP {
             //Debugging Only
             private bool _debug = false; 
 
-            public int _elbowAngleDeg;
+            public int _elbowDeg;
             public int _shoulderAbductionDeg; 
             public int _shoulderFlexionDeg;
 
@@ -54,9 +54,9 @@ namespace FYDP {
                 shoulderAbductionTorque = 0;
                 shoulderFlexionTorque = 0;
 
-                int elbowAngleDeg = _elbowAngleDeg;
-                int shoulderAbductionDeg = _shoulderAbductionDeg; 
-                int shoulderFlexionDeg = _shoulderFlexionDeg;
+                float elbowDeg = _elbowDeg;
+                float shoulderAbductionDeg = _shoulderAbductionDeg; 
+                float shoulderFlexionDeg = _shoulderFlexionDeg;
 
                 bool couldCalcShoulderJoint = EstimateShoulderJointCoordinates(
                     out Vector3 shoulderLocation, 
@@ -64,7 +64,7 @@ namespace FYDP {
                     out Vector3 forwardAxisVector);
 
                 if(!_debug && (!_braceSensorReader.GetJointAngles(
-                        out elbowAngleDeg, out shoulderAbductionDeg, 
+                        out elbowDeg, out shoulderAbductionDeg, 
                         out shoulderFlexionDeg) || 
                     !couldCalcShoulderJoint)) {
 

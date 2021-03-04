@@ -8,26 +8,39 @@ using System;
 namespace FYDP {
     namespace ArmBrace {
         public class BraceSensorReader {
-            private enum AngleIndex {
-                Elbow = 0,
-                ShoulderAbduction = 1,
-                ShoulderFlexion = 2
+            private struct SensorDataBuffer {
+                public float ElbowDeg;
+                public float ShoulderAbductionDeg;
+                public float ShoulderFlexionDeg;
             }
             public BraceSensorReader(SerialPort arduinoPort) {
                 _arduinoPort = arduinoPort;
                 // Hard-coded, expand flexibility if needed.
-                int frameSize = 4;
-                byte frameStart = 0xFF;
-
-                _frameSize = frameSize;
-                _frameStart = frameStart;
-                _jointAngleBuffers = new int[2, _frameSize - 1];
+                _frameHeader = new byte[2] {0xC0, 0xC0};
+                _frameMsgLength = 10;
+                
+                _sensorDataBuffers = new SensorDataBuffer[2];
                 for(int i = 0; i < 2; i++) {
-                    for(int j = 0; j <  _frameSize - 1; j++) {
-                        _jointAngleBuffers[i, j] = 0;
-                    }
+                    _sensorDataBuffers[i] = new SensorDataBuffer();
                 }
                 _readThread = new Thread(this.AsyncSensorReads);
+            }
+
+            private float DecodeAngleBytes(byte msb, byte lsb) {
+                return (((msb << 8) | lsb) * 180/(float)Int16.MaxValue);
+            }
+
+            private void ProcessInputByteArray(
+                byte[] byteArray, out SensorDataBuffer sensorDataBuffer) {
+                
+                sensorDataBuffer.ElbowDeg = DecodeAngleBytes(
+                    byteArray[1], byteArray[0]);
+
+                sensorDataBuffer.ShoulderAbductionDeg = DecodeAngleBytes(
+                    byteArray[3], byteArray[2]);
+
+                sensorDataBuffer.ShoulderFlexionDeg = DecodeAngleBytes(
+                    byteArray[5], byteArray[4]);
             }
 
             ~BraceSensorReader() {
@@ -50,80 +63,98 @@ namespace FYDP {
                     _readThread.Join();   
                 }
             }
-            public bool GetJointAngles(out int elbowAngleDeg, 
-                out int shoulderAbductionDeg, out int shoulderFlexionDeg) {
+            public bool GetJointAngles(out float elbowDeg, 
+                out float shoulderAbductionDeg, out float shoulderFlexionDeg) {
                 if(_readBufferIndexMutex.WaitOne(1)) {
-                    elbowAngleDeg = 
-                        _jointAngleBuffers[_readBufferIndex,(int)AngleIndex.Elbow];
+                    elbowDeg = 
+                        _sensorDataBuffers[_readBufferIndex].ElbowDeg;
                     shoulderAbductionDeg = 
-                        _jointAngleBuffers[_readBufferIndex,(int)AngleIndex.ShoulderAbduction];
+                        _sensorDataBuffers[_readBufferIndex].ShoulderAbductionDeg;
                     shoulderFlexionDeg = 
-                        _jointAngleBuffers[_readBufferIndex,(int)AngleIndex.ShoulderFlexion];
+                        _sensorDataBuffers[_readBufferIndex].ShoulderFlexionDeg;
+                    
                     _readBufferIndexMutex.ReleaseMutex();
 
                     return true;
                 }
-                elbowAngleDeg = 0;
+                elbowDeg = 0;
                 shoulderAbductionDeg = 0;
                 shoulderFlexionDeg = 0;
                 return false;
             }
             private void AsyncSensorReads() {
-                byte[] buffer = new byte[_frameSize];
-                int currFrameByte = 0;
+                int readLength = _frameHeader.Length + _frameMsgLength;
+
+                byte[] buffer = new byte[readLength];
+                byte[] msgBytes = new byte[_frameMsgLength];
+                int currFrameMsgByte = 0;
+                int currFrameHeaderByte = 0;
+
                 bool buildingIncompleteFrame = false;
 
                 uint writeBufferIndex = _readBufferIndex ^ 1;
                 int bytesRead = 0;
+
                 while (!_stopThreadNeatly) {
                     if (_arduinoPort.IsOpen) {
                         
                         try{
-                            bytesRead = _arduinoPort.Read(
-                                buffer, 0, _frameSize);
+                            bytesRead = _arduinoPort.Read(buffer, 
+                                                          0, 
+                                                          readLength);
                         } catch (TimeoutException) {
                             continue;
                         }
                         
-                        for(int i = 0; i < bytesRead; i++) {
-                            if(buildingIncompleteFrame) {
-                                _jointAngleBuffers[writeBufferIndex,currFrameByte] = buffer[i];
-                                currFrameByte += 1;
-                                if (currFrameByte >= _frameSize - 1){
+                        for(int i = 0; i < bytesRead; i += 1) {
+
+                            if(buildingIncompleteFrame) {    
+                                msgBytes[currFrameMsgByte] = buffer[i];
+                                currFrameMsgByte += 1;
+                                if (currFrameMsgByte >= _frameMsgLength) {
                                     break;
                                 }
+                            } else if(buffer[i] == _frameHeader[currFrameHeaderByte]) {
+                                currFrameHeaderByte += 1;
+
+                                if (currFrameHeaderByte >= _frameHeader.Length) { 
+                                    buildingIncompleteFrame = true;
+                                    currFrameHeaderByte = 0;
+                                    currFrameMsgByte = 0;
+                                } 
+                            } else {
+                                currFrameHeaderByte = 0;
                             }
-                            if(buffer[i] == _frameStart) {
-                                buildingIncompleteFrame = true;
-                                currFrameByte = 0;
-                            }   
                         }
-                        //buildingIncompleteFrame = false;
-                        //currFrameByte = 0;
-                        
+                                                
                         // While C# int read/writes are atomic, an array 
                         // access with a variable index is not atomic.
                         // If the mutex starts slowing this down, try 
                         // removing it; human motion should be slow enough
                         // for angles being a few frames out of sync should
                         // be fine.
-                        if (currFrameByte >= _frameSize - 1) {
+                        if (currFrameMsgByte >= _frameMsgLength) {
                             buildingIncompleteFrame = false;
+                            
+                            //Debug.Log("MSG: " + BitConverter.ToString(msgBytes));
+                            ProcessInputByteArray(
+                                msgBytes, out _sensorDataBuffers[writeBufferIndex]);
+
                             if(_readBufferIndexMutex.WaitOne(1)) {
                                 _readBufferIndex ^= 1;
                                 writeBufferIndex = _readBufferIndex ^ 1;
                                 _readBufferIndexMutex.ReleaseMutex();
-                                currFrameByte = 0;
+                                currFrameMsgByte = 0;
                             }
                         }
                     }
                 }
             }
             private SerialPort _arduinoPort;
-            private int _frameSize;
-            private byte _frameStart;
+            private int _frameMsgLength;
+            private byte[] _frameHeader;
             private uint _readBufferIndex = 0; 
-            private int[,] _jointAngleBuffers;
+            private SensorDataBuffer[] _sensorDataBuffers;
             private Thread _readThread = null;
             private Mutex _readBufferIndexMutex = new Mutex();
             private bool _stopThreadNeatly;
