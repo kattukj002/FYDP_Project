@@ -16,7 +16,7 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private bool UseDummyInputs = false;
     [SerializeField]
-    private bool PrintIntermediateValues = false;
+    private bool PrintIntermediateValues = true;
     [SerializeField]
     private string ArduinoPortName = "COM4";
     [SerializeField]
@@ -130,7 +130,7 @@ public class SimulationForce : MonoBehaviour
             Logging.PrintQty("SHOULDER_FLEXION_TORQUE", shoulderFlexionTorque, "N-m");
         }
 
-        applyTorques(elbowTorque, 
+        applyTorques(-elbowTorque, 
                             shoulderAbductionTorque, 
                             shoulderFlexionTorque);
         _collisionForce.Set(0,0,0);
