@@ -135,7 +135,6 @@ GameObject:
   - component: {fileID: 704840017}
   - component: {fileID: 704840016}
   - component: {fileID: 704840021}
-  - component: {fileID: 704840022}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -240,46 +239,11 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 704840015}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a347e694bb680af6b9c3678fbf3dbf8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  upperArmLength: 0.4899
-  lowerArmLength: 0.5
-  forceAtHand: {x: 0, y: -9.81, z: 0}
-  rightControllerLocation: {x: -0.5, y: -0.4899, z: 0}
-  _elbowAngleDeg: 90
-  _shoulderAbductionDeg: 90
-  _shoulderFlexionDeg: 0
-  _headsetPosition: {x: 0, y: 0, z: 0.3}
-  headSetFromDirection: {x: 0, y: 0, z: 1}
-  headSetToDirection: {x: 0, y: 0, z: 1}
-  shoulderOffsetFromNeckBaseLength: 0.2
-  shoulderOffsetFromNeckBaseFromDirection: {x: 0, y: -1, z: 0}
-  shoulderOffsetFromNeckBaseToDirection: {x: 1, y: 0, z: 0}
-  neckBaseOffsetFromHeadsetLength: 0.25
-  neckBaseOffsetFromHeadsetFromDirection: {x: 0, y: 0, z: 1}
-  neckBaseOffsetFromHeadsetToDirection: {x: 0, y: -1, z: 0}
---- !u!114 &704840022
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 704840015}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 384e32e4154c436f9be7870a323005a7, type: 3}
+  m_Script: {fileID: 11500000, guid: b02553344881b6c4992e61f592e8a73e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UpperArmLength: 0.3
-  LowerArmLength: 0.4
-  ArmMass: 2
-  _cachedMass: 20
-  arduinoPortName: /dev/ttyACM0
-  _debug: 1
-  _rightControllerLocation: {x: 0, y: 0, z: 0}
 --- !u!1 &822617894
 GameObject:
   m_ObjectHideFlags: 0

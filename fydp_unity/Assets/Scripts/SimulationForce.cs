@@ -1,84 +1,77 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using System.IO.Ports;
+using System;
 using FYDP.ArmBrace;
-using FYDP.Controllers;
 using FYDP.VR;
+using FYDP.Utils;
 using UnityEditor;
 
 public class SimulationForce : MonoBehaviour
 {
-    private DigitalController _elbowController;
-    private DigitalController _shoulderAbductionController;
-    private DigitalController _shoulderFlexionController;
+    [SerializeField]
+    private float ArmMass = 2f;
+    [SerializeField]
+    private bool UseDummyInputs = false;
+    [SerializeField]
+    private bool PrintIntermediateValues = false;
+    [SerializeField]
+    private string ArduinoPortName = "COM4";
+    [SerializeField]
+    private int ArduinoBaudRate = 115200;
+    [SerializeField]
+    private int SerialWriteTimeout = 1;
+    [SerializeField]
+    private int SerialReadTimeout = 1;
+    [SerializeField]
+    private int SerialReadBufferSize = 16;
+    [SerializeField]
+    private int SerialWriteBufferSize = 16;
+    [SerializeField]
+    private int sensorDataRelevanceLifetimeMs = 5000;
+    [SerializeField]
+    private float UpperArmLength = 0.3f;
+    [SerializeField]
+    private float LowerArmLength = 0.4f;
+    [SerializeField]
+    private float ShoulderDistFromNeckBase = 0.25f;
+    [SerializeField]
+    private Vector3 NeckBaseOffsetFromHeadset = new Vector3(0, 0.22f, 0);
 
-    public float UpperArmLength = 0.3f;
-    public float LowerArmLength = 0.4f;
-    public float ArmMass = 2f;
-    
-    private InputDevice _rightController;
-    private Vector3 _simForce;
-    //Temp, testing purposes only.
-    public float _cachedMass = 0f;
-    private Vector3 _collisionForce = new Vector3(0,0,0);
-    
-    public string ArduinoPortName = "COM4";
-    public int ArduinoBaudRate = 115200;
-    private BraceCmd _armCmd;
-    private ArmVectorModel _armModel;
-    private MotionEstimator motionEstimator;
-    public bool _debug = false;
-    public Vector3 _rightControllerLocation;
-    private SerialPort _arduinoPort;
     void Start()
     {
-        _elbowController = new PidController(
-            pGain: 5, iGain: 0.01f, dGain: 2, 
-            samplingPeriod: Time.fixedDeltaTime, derivativeRollOffPole: -40);
-        _shoulderAbductionController = new PidController(
-            pGain: 5, iGain: 0.01f, dGain: 2, 
-            samplingPeriod: Time.fixedDeltaTime, derivativeRollOffPole: -40);
-        _shoulderFlexionController = new PidController(
-            pGain: 5, iGain: 0.01f, dGain: 2, 
-            samplingPeriod: Time.fixedDeltaTime, derivativeRollOffPole: -40);
-
         XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
         controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
         controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
 
-        if(!_debug) {
+        if(!UseDummyInputs) {
             _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
         
             //Will need to look into the correct values for this.
-            _arduinoPort.WriteTimeout = 1;
-            _arduinoPort.ReadTimeout = 1;
-            _arduinoPort.ReadBufferSize = 16;
-            _arduinoPort.WriteBufferSize = 16;
-
+            _arduinoPort.WriteTimeout = SerialWriteTimeout;
+            _arduinoPort.ReadTimeout = SerialReadTimeout;
+            _arduinoPort.ReadBufferSize = SerialReadBufferSize;
+            _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
 
             _armCmd = new BraceCmd(_arduinoPort);
-
-            if(!VRUtils.TryGetInputDevice(
-                VRUtils.DeviceId.RightController, out _rightController)) {
-                
-                Debug.Log("Could not access right controller.");
-            }
         }
-        
-        ArmVectorModel.OffsetPolarVector shoulderOffsetFromNeckBase = new ArmVectorModel.OffsetPolarVector();
-        shoulderOffsetFromNeckBase.Length = 0.1f;
-        shoulderOffsetFromNeckBase.Rotation = Quaternion.AngleAxis(90, Vector3.right);
-        ArmVectorModel.OffsetPolarVector neckBaseOffsetFromHeadset = new ArmVectorModel.OffsetPolarVector();
-        neckBaseOffsetFromHeadset.Length = 0.2f;
-        neckBaseOffsetFromHeadset.Rotation = Quaternion.AngleAxis(90, Vector3.right);
 
-        _armModel = new ArmVectorModel(new BraceSensorReader(_arduinoPort),
-                upperArmLength: UpperArmLength, lowerArmLength: LowerArmLength, 
-                shoulderOffsetFromNeckBase: shoulderOffsetFromNeckBase, 
-                neckBaseOffsetFromHeadset: neckBaseOffsetFromHeadset, debug:_debug);
+        CalibrationValues calibrationValues = new CalibrationValues();
+        calibrationValues.UpperArmLength = UpperArmLength;
+        calibrationValues.LowerArmLength = LowerArmLength;
+        calibrationValues.ShoulderDistFromNeckBase = ShoulderDistFromNeckBase;
+        calibrationValues.NeckBaseOffsetFromHeadset = NeckBaseOffsetFromHeadset;
+        
+        _sensorReadings = new SensorReadings(
+            new BraceSensorReader(_arduinoPort), 
+            TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
+
+        _armModel = new ArmVectorModel(_sensorReadings,
+                calibrationValues, 
+                useDummyInputs: UseDummyInputs,
+                printIntermediateValues: PrintIntermediateValues);
 
         motionEstimator = new MotionEstimator(Time.fixedDeltaTime);
 
@@ -88,9 +81,9 @@ public class SimulationForce : MonoBehaviour
             }
         };
     }
+
     ~SimulationForce(){
         ReleaseResources();
-        Debug.Log("Ended Simulation Forces Script");
     }
     void OnApplicationQuit() {
         ReleaseResources();
@@ -99,11 +92,7 @@ public class SimulationForce : MonoBehaviour
         _arduinoPort.Close();
     }
 
-
     void GetHeldObjectMass(XRBaseInteractable interactable){
-
-        //TODO: need to make sure the type of the interactable is UnityEngine.XR.Interaction.Toolkit.XRGrabInteractable
-
         List<Collider> colliderList = interactable.colliders;
         _cachedMass = colliderList[0].attachedRigidbody.mass;
     }
@@ -114,52 +103,37 @@ public class SimulationForce : MonoBehaviour
 
     void FixedUpdate()
     {
-        bool couldReadRightController;
-        Vector3 rightControllerLocation;
-        if (!_debug) {
-            couldReadRightController = _rightController.TryGetFeatureValue(
-                CommonUsages.devicePosition, out rightControllerLocation);
-        } else {
-            couldReadRightController = true;
-            rightControllerLocation = _rightControllerLocation;
-        }
-        
-
-        if(couldReadRightController){
-            motionEstimator.UpdateNewPosition(rightControllerLocation);
-        } else {
+        if(!_sensorReadings.Update()) {
+            Debug.Log("Could not get updated sensor readings.");
             motionEstimator.EstimateUnobtainableNewPosition();
+        } else {
+            motionEstimator.UpdateNewPosition(_sensorReadings.Data.RightControllerPosition);
         }
 
         _simForce = Physics.gravity*_cachedMass + _collisionForce;
-        
-        if(_debug) {
-            Debug.Log("SIM_FORCE = " + _simForce);
-        }
-
+    
         if (_cachedMass > 0){
-            // The "magic product" is the inertial force, may need to be modified.
             _simForce += motionEstimator.EstimateAcceleration() * ArmMass * 
                 _cachedMass / (ArmMass + _cachedMass);
         }
 
-        if(!_debug) {
-            if(_armModel.CalculateJointTorques(forceAtHand: _simForce,
-                    rightControllerLocation, out float elbowTorque, 
-                    out float shoulderAbductionTorque, 
-                    out float shoulderFlexionTorque)) {
-                
-                Debug.Log("SIM_ELBOW_TORQUE = " + elbowTorque.ToString());
-                Debug.Log("SIM_SHOULDER_ABDUCTION_TORQUE = " + shoulderAbductionTorque.ToString());
-                Debug.Log("SIM_SHOULDER_FLEXION_TORQUE = " + shoulderFlexionTorque.ToString());
+        _armModel.CalculateJointTorques(
+            forceAtHand: _simForce,
+            out float elbowTorque, 
+            out float shoulderAbductionTorque, 
+            out float shoulderFlexionTorque);
 
-                applyTorques(elbowTorque, 
+        if(!PrintIntermediateValues) {
+            Logging.PrintQty("SIM_FORCE", _simForce, "N");
+            Logging.PrintQty("ELBOW_TORQUE", elbowTorque, "N-m");
+            Logging.PrintQty("SHOULDER_ABDUCTION_TORQUE", shoulderAbductionTorque, "N-m");
+            Logging.PrintQty("SHOULDER_FLEXION_TORQUE", shoulderFlexionTorque, "N-m");
+        }
+
+        applyTorques(elbowTorque, 
                             shoulderAbductionTorque, 
                             shoulderFlexionTorque);
-                _collisionForce.Set(0,0,0);
-            }
-        }
-        
+        _collisionForce.Set(0,0,0);
     }
 
     void OnCollisionEnter(Collision collision){
@@ -182,5 +156,15 @@ public class SimulationForce : MonoBehaviour
 
         _armCmd.Send();
     }
-
+    
+    private Vector3 _simForce;
+    public float _cachedMass = 0f;
+    private Vector3 _collisionForce = new Vector3(0,0,0);
+    
+    
+    private BraceCmd _armCmd;
+    private ArmVectorModel _armModel;
+    private MotionEstimator motionEstimator;
+    private SerialPort _arduinoPort;
+    private SensorReadings _sensorReadings;
 }

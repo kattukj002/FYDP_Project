@@ -1,229 +1,201 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.XR;
-using System.IO.Ports;
+﻿using UnityEngine;
 using FYDP.VR;
+using FYDP.Utils;
+using System;
 
 namespace FYDP {
     namespace ArmBrace {
         public class ArmVectorModel {
-            public struct OffsetPolarVector {
-                public float Length;
-                public Quaternion Rotation;
+            
+            public ArmVectorModel(SensorReadings sensorReadings,  
+                CalibrationValues calibrationValues,
+                bool useDummyInputs=false,
+                bool printIntermediateValues=false) {
+
+                _upperArmLength = calibrationValues.UpperArmLength;
+                _lowerArmLength = calibrationValues.LowerArmLength;
+                _shoulderDistFromNeckBase = calibrationValues.ShoulderDistFromNeckBase;
+                _neckBaseOffsetFromHeadset = calibrationValues.NeckBaseOffsetFromHeadset;
+
+                _useDummySensorReadings = useDummyInputs;
+                _printIntermediateValues = printIntermediateValues;
+               
+               _sensorReadings = sensorReadings;
+                _cachedElbowAxis = new Vector3(0,0,0);
+                _prevNeckBaseToShoulder = Vector3.right * _shoulderDistFromNeckBase;
+                _prevShoulderToElbow = Vector3.down * _upperArmLength;
+                TryInitSensors();
             }
-            //Debugging Only
-            private bool _debug = false; 
 
-            public int _elbowDeg;
-            public int _shoulderAbductionDeg; 
-            public int _shoulderFlexionDeg;
-
-            public Quaternion _headsetRotation;
-            public Vector3 _headsetPosition;
-
-            public ArmVectorModel(BraceSensorReader braceSensorReader,
-                float upperArmLength, float lowerArmLength, 
-                OffsetPolarVector shoulderOffsetFromNeckBase, 
-                OffsetPolarVector neckBaseOffsetFromHeadset, bool debug=false) {
-                
-                _braceSensorReader = braceSensorReader;
-                _upperArmLength = upperArmLength;
-                _lowerArmLength = lowerArmLength;
-
-                _shoulderOffsetFromNeckBase = shoulderOffsetFromNeckBase;
-                _neckBaseOffsetFromHeadset = neckBaseOffsetFromHeadset;
-
-                _debug = debug;
-                if(!_debug) {
-                    if(!VRUtils.TryGetInputDevice(
-                        VRUtils.DeviceId.Headset, out _headset)) {
-                        
-                        Debug.Log("Could not access headset.");
-                    }
-
-                    _braceSensorReader.StartAsyncSensorReads();
+            public bool TryInitSensors() {
+                if(!_useDummySensorReadings) {
+                    return _sensorReadings.TryInitSensors();
+                } else {
+                    _sensorReadings.UseDummySensorReadings(true);
                 }
+                return true;
             }
 
-            public bool CalculateJointTorques(Vector3 forceAtHand, 
-                Vector3 rightControllerLocation, 
-                out float elbowTorque, out float shoulderAbductionTorque, 
+            public void CalculateJointTorques(Vector3 forceAtHand, 
+                out float elbowTorque, 
+                out float shoulderAbductionTorque, 
                 out float shoulderFlexionTorque) {
-                
-                elbowTorque = 0;
-                shoulderAbductionTorque = 0;
-                shoulderFlexionTorque = 0;
-
-                float elbowDeg = _elbowDeg;
-                float shoulderAbductionDeg = _shoulderAbductionDeg; 
-                float shoulderFlexionDeg = _shoulderFlexionDeg;
-
-                bool couldCalcShoulderJoint = EstimateShoulderJointCoordinates(
-                    out Vector3 shoulderLocation, 
-                    out Vector3 rightShoulderAxisVector, 
-                    out Vector3 forwardAxisVector);
-
-                if(!_debug){
-                    bool couldGetAngles = _braceSensorReader.GetJointAngles(
-                        out elbowDeg, out shoulderAbductionDeg, 
-                        out shoulderFlexionDeg);
                     
-                    if (!couldGetAngles || !couldCalcShoulderJoint) {
-                        Debug.Log("Could not read from the devices.");
-                        return false;
-                    } 
-                }      
-                Debug.Log("ELBOW_DEG: " + elbowDeg.ToString());
-                Debug.Log("SHOULDER_ABDUCTION_DEG: " + shoulderAbductionDeg.ToString());
-                Debug.Log("SHOULDER_FLEXION_DEG: " + shoulderFlexionDeg.ToString());
-                Vector3 shoulderMomentArm = rightControllerLocation -  
-                                            shoulderLocation;
+                EstimateArmGeometry(out Vector3 shoulderPosition,
+                                    out Vector3 rightShoulderAxisVector, 
+                                    out Vector3 torsoUpAxisVector,
+                                    out Vector3 torsoForwardAxisVector,
+                                    out Vector3 elbowPosition,
+                                    out Vector3 elbowAxisVector,
+                                    out Vector3 lowerArmVector);
+                
+                Vector3 shoulderMomentArm = _sensorReadings.Data.RightControllerPosition -  
+                                            shoulderPosition;
 
                 Vector3 shoulderMoment = Vector3.Cross(shoulderMomentArm, 
                                                        forceAtHand);
                 
                 shoulderAbductionTorque = Vector3.Dot(
-                    shoulderMoment, forwardAxisVector);
+                    shoulderMoment, torsoForwardAxisVector);
 
                 shoulderFlexionTorque = Vector3.Dot(
                     shoulderMoment, rightShoulderAxisVector);
-                
+
                 Vector3 torsoUpUnitVector = Vector3.Cross(
-                    forwardAxisVector, rightShoulderAxisVector).normalized;
-
-                Vector3 upperArmVector = 
-                    Quaternion.AngleAxis(shoulderFlexionDeg, 
-                        rightShoulderAxisVector) *
-                    Quaternion.AngleAxis(shoulderAbductionDeg, 
-                        forwardAxisVector) * 
-                    (_upperArmLength * rightShoulderAxisVector);
-                Debug.Log("upperArmVector: " + upperArmVector.ToString());
-
-                Vector3 elbowLocation = upperArmVector + shoulderLocation;
+                    torsoForwardAxisVector, rightShoulderAxisVector).normalized;
                 
-                // Use saved arm length instead of controller location 
-                // directly.
-                Vector3 lowerArmVector = 
-                    _lowerArmLength * 
-                    (rightControllerLocation - elbowLocation).normalized;
-                
-                Debug.Log("lowerArmVector: " + lowerArmVector.ToString());
-
-                Vector3 elbowAxisVector = Vector3.Cross(
-                    lowerArmVector, upperArmVector).normalized;
-                
-                Debug.Log("elbowAxisVector: " + elbowAxisVector.ToString());
-
                 elbowTorque = Vector3.Dot(
                     Vector3.Cross(lowerArmVector, forceAtHand), 
                     elbowAxisVector);
 
-                if(_debug) {
-                    /*Debug.Log("shoulderMomentArm: " + 
-                        shoulderMomentArm.ToString());
-                    Debug.Log("shoulderMoment: " + 
-                        shoulderMoment.ToString());
-                    Debug.Log("shoulderAbductionTorque: " + 
-                        shoulderAbductionTorque.ToString());
-                    Debug.Log("shoulderFlexionTorque: " + 
-                        shoulderFlexionTorque.ToString());
-                    Debug.Log("torsoUpUnitVector: " + 
-                        torsoUpUnitVector.ToString());
-                    Debug.Log("upperArmVector: " + 
-                        upperArmVector.ToString());
-                    Debug.Log("elbowLocation: " + 
-                        elbowLocation.ToString());
-                    Debug.Log("lowerArmVector: " + 
-                        lowerArmVector.ToString());
-                    Debug.Log("elbowAxisVector: " + 
-                        elbowAxisVector.ToString());
-                    Debug.Log("elbowTorque" + 
-                        elbowTorque.ToString());*/
-                }
                 //Translate to right-hand moment vector convention.
                 shoulderAbductionTorque *= -1;
                 shoulderFlexionTorque *= -1;
                 elbowTorque *=-1;
-                return true;
+
+                if (_printIntermediateValues) {
+                    Logging.PrintQty("ELBOW_ANGLE", _sensorReadings.Data.ElbowDeg, "deg");
+                    Logging.PrintQty("SHOULDER_ABDUCTION_ANGLE", _sensorReadings.Data.ShoulderAbductionDeg, "deg");
+                    Logging.PrintQty("SHOULDER_FLEXION_ANGLE", _sensorReadings.Data.ShoulderFlexionDeg, "deg");
+
+                    Logging.PrintQty("SHOULDER_POSITION", shoulderPosition, "m");
+                    Logging.PrintQty("ELBOW_POSITION", elbowPosition, "m");
+                    
+                    Logging.PrintQty("SHOULDER_MOMENT: ", shoulderMoment, " N-m");
+
+                    Logging.PrintQty("SHOULDER_RIGHT_AXIS_VECTOR", rightShoulderAxisVector, "m");
+                    Logging.PrintQty("TORSO_FORWARD_AXIS_VECTOR", torsoForwardAxisVector, "m");
+                    Logging.PrintQty("TORSO_UP_AXIS_VECTOR", torsoUpUnitVector, "m");
+                    Logging.PrintQty("RIGHT_ELBOW_AXIS_VECTOR", elbowAxisVector, "m");
+                    
+                    Logging.PrintQty("SHOULDER_MOMENT_ARM_VECTOR", shoulderMomentArm, " N-m");
+                    Logging.PrintQty("LOWER_ARM_VECTOR", lowerArmVector, " m");                    
+                }
             }
 
-            //Need to figure out what vector the headset rotation is relative to
-            private bool EstimateShoulderJointCoordinates(
-                out Vector3 shoulderLocation,
+            private void EstimateArmGeometry(
+                out Vector3 shoulderPosition,
                 out Vector3 rightShoulderAxisVector, 
-                out Vector3 forwardAxisVector) {
+                out Vector3 torsoUpAxisVector,
+                out Vector3 torsoForwardAxisVector,
+                out Vector3 elbowPosition,
+                out Vector3 elbowAxisVector,
+                out Vector3 lowerArmVector) {
+
+                Vector3 neckBasePosition = 
+                    _sensorReadings.Data.HeadsetRotation * _neckBaseOffsetFromHeadset + 
+                    _sensorReadings.Data.HeadsetPosition;
+
+                Vector3 neckBaseToHand = 
+                    _sensorReadings.Data.RightControllerPosition - neckBasePosition;
                 
-                Quaternion headsetRotation = _headsetRotation;
-                Vector3 headsetPosition = _headsetPosition;
+                // Cosine Law
+                float shoulderToHandLength = 
+                    Formulas.CosineLawCalcLength(
+                        _upperArmLength, _lowerArmLength, 
+                        Units.DegreesToRadians(_sensorReadings.Data.ElbowDeg));
 
-                if (!_debug && 
-                    (!_headset.TryGetFeatureValue(
-                        CommonUsages.deviceRotation, 
-                        out headsetRotation) || 
-                    !_headset.TryGetFeatureValue(
-                        CommonUsages.devicePosition, 
-                        out headsetPosition))) {
-                        
-                    shoulderLocation = Vector3.zero;
-                    rightShoulderAxisVector = Vector3.zero;
-                    forwardAxisVector = Vector3.zero;
-                    return false;
+                float cos_NeckBaseHand_neckBaseShoulder_Angle = 
+                    Formulas.CosineLawCosAngle(neckBaseToHand.magnitude, 
+                                      _shoulderDistFromNeckBase,
+                                      shoulderToHandLength);
+                
+                Vector3 neckBaseToShoulder = Formulas.YPlaneLockedTwoBarStartMidVector(
+                    startEndVector: neckBaseToHand, 
+                    startMidLength: _shoulderDistFromNeckBase, 
+                    midEndLength: shoulderToHandLength, 
+                    cosLinkageAngle: cos_NeckBaseHand_neckBaseShoulder_Angle,
+                    prevStartMid: _prevNeckBaseToShoulder);
+
+                _prevNeckBaseToShoulder = neckBaseToShoulder;
+
+                shoulderPosition = neckBasePosition + neckBaseToShoulder;
+
+                rightShoulderAxisVector = neckBaseToShoulder.normalized;
+
+                torsoUpAxisVector = Vector3.up;
+                torsoForwardAxisVector = Vector3.Cross(
+                    neckBaseToShoulder, torsoUpAxisVector).normalized;
+
+                Vector3 upperArmVector = Vector3.Cross(
+                        Quaternion.AngleAxis(_sensorReadings.Data.ShoulderFlexionDeg + 90, 
+                            rightShoulderAxisVector) * -torsoUpAxisVector,
+                        Quaternion.AngleAxis(_sensorReadings.Data.ShoulderAbductionDeg + 90, 
+                            torsoForwardAxisVector) * -torsoUpAxisVector).normalized
+                        * _upperArmLength;
+
+                if (Vector3.Equals(upperArmVector, Constants.ZeroVector)) {
+                    upperArmVector = Formulas.YPlaneLockedTwoBarStartMidVector(
+                        startEndVector: _sensorReadings.Data.RightControllerPosition - shoulderPosition, 
+                        startMidLength: _upperArmLength, 
+                        midEndLength: _lowerArmLength, 
+                        cosLinkageAngle: (float)Math.Cos(Units.DegreesToRadians(_sensorReadings.Data.ElbowDeg)),
+                        prevStartMid: _prevShoulderToElbow
+                    );
+                }
+                 _prevShoulderToElbow = upperArmVector;
+                
+                elbowPosition = shoulderPosition + upperArmVector;
+                
+                lowerArmVector = _lowerArmLength * 
+                    (_sensorReadings.Data.RightControllerPosition - elbowPosition).normalized;
+
+                elbowAxisVector = Vector3.Cross(
+                    lowerArmVector, upperArmVector).normalized;
+                
+                if(Vector3.Equals(elbowAxisVector, Constants.ZeroVector)) {
+                    if(_cachedElbowAxis != Constants.ZeroVector) {
+                        elbowAxisVector = _cachedElbowAxis;
+                    } else {
+                        elbowAxisVector = rightShoulderAxisVector;
+                        _cachedElbowAxis = elbowAxisVector;
+                    }
+                } else {
+                    _cachedElbowAxis = elbowAxisVector;
                 }
 
-                // Projects a vector of the neck offset length forward, 
-                // rotates it to align with the headset forward direction, 
-                // rotates it by the relative angle of the neck base offset, 
-                // then adds the headset position to put the vector into  
-                // global coordinates.
-
-                Vector3 headsetToNeckBase = headsetRotation * 
-                    _neckBaseOffsetFromHeadset.Rotation * 
-                    (_neckBaseOffsetFromHeadset.Length * 
-                    Vector3.forward);
-
-                Vector3 neckBaseLocation = headsetToNeckBase + headsetPosition;
-
-                // Similar process, but for the shoulder joint location.
-                // Assumes shoulder joint doesn't move significantly wrt
-                // the base ofthe neck.
-
-                shoulderLocation = _shoulderOffsetFromNeckBase.Rotation *
-                (_shoulderOffsetFromNeckBase.Length * 
-                headsetToNeckBase.normalized) + neckBaseLocation;
-
-                rightShoulderAxisVector = (shoulderLocation - 
-                    neckBaseLocation).normalized;
-
-                // Assumes the user never bends over or backwards 
-                // significantly. Note that Unity uses a left-hand cross 
-                // product. Assume we're on the right shoulder. Note, not 
-                // normalized!
-                forwardAxisVector = Vector3.Cross(
-                    rightShoulderAxisVector, Vector3.up).normalized;
-                if(_debug) {
-                    /*
-                    Debug.Log("headsetToNeckBase: " + 
-                        headsetToNeckBase.ToString());
-                    Debug.Log("neckBaseLocation: " + 
-                        neckBaseLocation.ToString());
-                    Debug.Log("shoulderLocation: " + 
-                        shoulderLocation.ToString());
-                    Debug.Log("rightShoulderAxisVector: " + 
-                        rightShoulderAxisVector.ToString());
-                    Debug.Log("forwardAxisVector: " + 
-                        forwardAxisVector.ToString());
-                    */
+                if (_printIntermediateValues) {
+                    Logging.PrintQty("NECK_BASE_POSITION", neckBasePosition, "m");
+                    Logging.PrintQty("NECK_BASE_TO_HAND", neckBaseToHand, "m");
+                    Logging.PrintQty("SHOULDER_TO_HAND_LENGTH", shoulderToHandLength, "m");
+                    Logging.PrintQty("NECK_BASE_HAND_NECK_BASE_SHOULDER_ANGLE", 
+                        Units.RadiansToDegrees((float)Math.Acos(cos_NeckBaseHand_neckBaseShoulder_Angle)), "deg");
+                    Logging.PrintQty("NECK_BASE_TO_SHOULDER", neckBaseToShoulder, "m");
+                    Logging.PrintQty("UPPER_ARM_VECTOR", upperArmVector, " m");
                 }
-                return true;
             }
             
-            private InputDevice _headset;
             private float _upperArmLength;
             private float _lowerArmLength;
-            private OffsetPolarVector _shoulderOffsetFromNeckBase;
-            private OffsetPolarVector _neckBaseOffsetFromHeadset;
-            private BraceSensorReader _braceSensorReader;
+            private float _shoulderDistFromNeckBase;
+            private Vector3 _neckBaseOffsetFromHeadset;
+            private bool _useDummySensorReadings;
+            private bool _printIntermediateValues;
+            private Vector3 _prevNeckBaseToShoulder;
+            private Vector3 _prevShoulderToElbow;
+            private SensorReadings _sensorReadings;
+            private Vector3 _cachedElbowAxis;
+            private Vector3 _zeroVector;
         }
     }
 }

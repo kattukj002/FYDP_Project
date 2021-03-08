@@ -136,7 +136,6 @@ namespace FYDP {
                         if (currFrameMsgByte >= _frameMsgLength) {
                             buildingIncompleteFrame = false;
                             
-                            //Debug.Log("MSG: " + BitConverter.ToString(msgBytes));
                             ProcessInputByteArray(
                                 msgBytes, out _sensorDataBuffers[writeBufferIndex]);
 
