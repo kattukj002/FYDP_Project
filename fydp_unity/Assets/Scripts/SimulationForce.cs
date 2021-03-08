@@ -123,7 +123,7 @@ public class SimulationForce : MonoBehaviour
             out float shoulderAbductionTorque, 
             out float shoulderFlexionTorque);
 
-        if(!PrintIntermediateValues) {
+        if(PrintIntermediateValues) {
             Logging.PrintQty("SIM_FORCE", _simForce, "N");
             Logging.PrintQty("ELBOW_TORQUE", elbowTorque, "N-m");
             Logging.PrintQty("SHOULDER_ABDUCTION_TORQUE", shoulderAbductionTorque, "N-m");
