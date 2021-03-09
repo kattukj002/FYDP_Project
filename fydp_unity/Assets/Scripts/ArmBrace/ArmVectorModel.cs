@@ -175,7 +175,10 @@ namespace FYDP {
                 }
 
                 if (_printIntermediateValues) {
+                    Logging.PrintQty("HEAD_POSITION", _sensorReadings.Data.HeadsetPosition);
                     Logging.PrintQty("NECK_BASE_POSITION", neckBasePosition, "m");
+                    Logging.PrintQty("HAND_POSITION", _sensorReadings.Data.RightControllerPosition, "m");
+
                     Logging.PrintQty("NECK_BASE_TO_HAND", neckBaseToHand, "m");
                     Logging.PrintQty("SHOULDER_TO_HAND_LENGTH", shoulderToHandLength, "m");
                     Logging.PrintQty("NECK_BASE_HAND_NECK_BASE_SHOULDER_ANGLE", 

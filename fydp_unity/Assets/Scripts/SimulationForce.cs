@@ -130,7 +130,7 @@ public class SimulationForce : MonoBehaviour
             Logging.PrintQty("SHOULDER_FLEXION_TORQUE", shoulderFlexionTorque, "N-m");
         }
 
-        applyTorques(-elbowTorque, 
+        applyTorques(elbowTorque, 
                             shoulderAbductionTorque, 
                             shoulderFlexionTorque);
         _collisionForce.Set(0,0,0);
@@ -150,7 +150,7 @@ public class SimulationForce : MonoBehaviour
     void applyTorques(float elbowTorque, float shoulderAbductionTorque, 
                       float shoulderFlexionTorque)
     {
-        _armCmd.elbow.SetTorque(elbowTorque);
+        _armCmd.elbow.SetTorque(-elbowTorque);
         _armCmd.shoulderAbduction.SetTorque(shoulderAbductionTorque);
         _armCmd.shoulderFlexion.SetTorque(shoulderFlexionTorque);
 
