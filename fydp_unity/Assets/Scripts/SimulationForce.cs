@@ -38,7 +38,7 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private float ShoulderDistFromNeckBase = 0.25f;
     [SerializeField]
-    private Vector3 NeckBaseOffsetFromHeadset = new Vector3(0, 0.22f, 0);
+    private Vector3 NeckBaseOffsetFromHeadset = new Vector3(0, -0.22f, 0);
 
     void Start()
     {
