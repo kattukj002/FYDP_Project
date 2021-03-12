@@ -104,17 +104,20 @@ namespace FYDP {
                 float tempElbowDeg; 
                 float tempShoulderAbductionDeg; 
                 float tempShoulderFlexionDeg;
+                
+                // if(!_braceSensorReader.GetJointAngles(
+                //     out tempElbowDeg, out tempShoulderAbductionDeg, 
+                //     out tempShoulderFlexionDeg)) {
 
-                if(!_braceSensorReader.GetJointAngles(
-                    out tempElbowDeg, out tempShoulderAbductionDeg, 
-                    out tempShoulderFlexionDeg)) {
+                //     readFromAllSensors =  false;
+                // } else {
+                //     Data.OverwriteElbowDeg(tempElbowDeg);
+                //     Data.OverwriteShoulderAbductionDeg(tempShoulderAbductionDeg);
+                //     Data.OverwriteShoulderFlexionDeg(tempShoulderFlexionDeg);
+                // }
 
-                    readFromAllSensors =  false;
-                } else {
-                    Data.OverwriteElbowDeg(tempElbowDeg);
-                    Data.OverwriteShoulderAbductionDeg(tempShoulderAbductionDeg);
-                    Data.OverwriteShoulderFlexionDeg(tempShoulderFlexionDeg);
-                }
+                Data.OverwriteShoulderAbductionDeg(0);
+                Data.OverwriteShoulderFlexionDeg(0);
 
                 if(readFromAllSensors) {
                     _currDataTimeStamp = DateTime.Now;
