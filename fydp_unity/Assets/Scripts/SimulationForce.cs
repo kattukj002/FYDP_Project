@@ -111,7 +111,7 @@ public class SimulationForce : MonoBehaviour
             motionEstimator.UpdateNewPosition(_sensorReadings.Data.RightControllerPosition);
         }
 
-        if (_sensorReadings.RightControllerTrigger != 0) {
+        if (_sensorReadings.Data.RightControllerTrigger != 0) {
             Start();
             return;
         }
