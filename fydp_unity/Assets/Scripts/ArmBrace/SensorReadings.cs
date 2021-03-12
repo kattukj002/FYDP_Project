@@ -12,7 +12,7 @@ namespace FYDP {
             public SensorReadings(
                 BraceSensorReader braceSensorReader,
                 TimeSpan dataRelevanceLifetime,
-                SensorData dummyData= new SensorData()) {
+                SensorData dummyData = new SensorData()) {
                 
                 _dummyData = dummyData;
                 
@@ -90,15 +90,22 @@ namespace FYDP {
                 }
 
                 Vector3 tempRightControllerPosition;
+                float tempRightControllerTrigger;
                 if (!_rightController.TryGetFeatureValue(
                         CommonUsages.devicePosition, 
-                        out tempRightControllerPosition)) {
+                        out tempRightControllerPosition) || 
+                    !_rightController.TryGetFeatureValue(
+                        CommonUsages.trigger, 
+                        out tempRightControllerTrigger)) {
 
                     Debug.Log("Could not read from right controller sensors.");
-
+                    
+                    // Assume button is not pressed if can't get the controller.
+                    Data.OverwriteRightControllerTrigger(0);
                     readFromAllSensors =  false;
                 } else {
                     Data.OverwriteRightControllerPosition(tempRightControllerPosition);
+                    Data.OverwriteRightControllerTrigger(tempRightControllerTrigger);
                 }
 
                 float tempElbowDeg; 

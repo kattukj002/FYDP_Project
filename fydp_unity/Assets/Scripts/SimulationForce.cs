@@ -103,6 +103,7 @@ public class SimulationForce : MonoBehaviour
 
     void FixedUpdate()
     {
+
         if(!_sensorReadings.Update()) {
             Debug.Log("Could not get updated sensor readings.");
             motionEstimator.EstimateUnobtainableNewPosition();
@@ -110,6 +111,10 @@ public class SimulationForce : MonoBehaviour
             motionEstimator.UpdateNewPosition(_sensorReadings.Data.RightControllerPosition);
         }
 
+        if (_sensorReadings.RightControllerTrigger != 0) {
+            Start();
+            return;
+        }
         _simForce = Physics.gravity*_cachedMass + _collisionForce;
     
         if (_cachedMass > 0){

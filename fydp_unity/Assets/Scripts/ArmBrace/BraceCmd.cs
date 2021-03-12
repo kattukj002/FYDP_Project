@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO.Ports;
 using System;
+using FYDP.Utils;
 
 namespace FYDP {
     namespace ArmBrace {
@@ -33,6 +34,8 @@ namespace FYDP {
 
                 if(_arduinoPort.IsOpen) {
                     _arduinoPort.Write(_cmdFrame, 0, _cmdFrameLength);
+                    Logging.PrintQty("ELBOW_CMD_ID", elbow.Id);
+                    Logging.PrintQty("ELBOW_CMD_TORQUE", elbow.Data, "N");
                 } else {
                     Debug.Log("Cannot send arm command: arduinoPort is" + 
                               " not open.");

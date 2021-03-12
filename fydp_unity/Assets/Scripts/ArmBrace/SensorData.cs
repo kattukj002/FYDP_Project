@@ -9,6 +9,8 @@ namespace FYDP {
             public Quaternion HeadsetRotation {get; private set;}
             public Vector3 HeadsetPosition {get; private set;}
             public Vector3 RightControllerPosition {get; private set;}
+            public float RightControllerTrigger {get; private set;}
+            
             public void OverwriteElbowDeg(float elbowDeg) {
                 ElbowDeg = elbowDeg;
             }
@@ -26,6 +28,9 @@ namespace FYDP {
             }
             public void OverwriteRightControllerPosition(Vector3 rightControllerPosition) {
                 RightControllerPosition = rightControllerPosition;
+            }
+            public void OverwriteRightControllerTrigger(float rightControllerTrigger) {
+                RightControllerTrigger = rightControllerTrigger;
             }
         }
     }
