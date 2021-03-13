@@ -3,26 +3,28 @@ using UnityEngine;
 namespace FYDP {
     namespace ArmBrace {
         public struct SensorData {
-            private MovingAvg<float> _elbowDegs;
-            private MovingAvg<float> _shoulderAbductionDegs;
-            private MovingAvg<float> _shoulderFlexionDegs;
-            private MovingAvg<Vector3> _headsetPositions;
-            private MovingAvg<Vector3> _rightControllerPositions;
+            private MovingAvgFloat _elbowDegs;
+            private MovingAvgFloat _shoulderAbductionDegs;
+            private MovingAvgFloat _shoulderFlexionDegs;
+            private MovingAvgVector3 _headsetPositions;
+            private MovingAvgVector3 _rightControllerPositions;
 
-            public float ElbowDeg {get {return _elbowDegs.Avg;} private set;}
-            public float ShoulderAbductionDeg {get {return _shoulderAbductionDegs.Avg;} private set;}
-            public float ShoulderFlexionDeg {get {return _shoulderFlexionDegs.Avg;} private set;}
+            public float ElbowDeg {get {return _elbowDegs.Avg;} private set{}}
+            public float ShoulderAbductionDeg {get {return _shoulderAbductionDegs.Avg;} private set{}}
+            public float ShoulderFlexionDeg {get {return _shoulderFlexionDegs.Avg;} private set{}}
             public Quaternion HeadsetRotation {get; private set;}
-            public Vector3 HeadsetPosition {get {return _headsetPositions.Avg;} private set;}
-            public Vector3 RightControllerPosition {get {return _rightControllerPositions.Avg;} private set;}
+            public Vector3 HeadsetPosition {get {return _headsetPositions.Avg;} private set{}}
+            public Vector3 RightControllerPosition {get {return _rightControllerPositions.Avg;} private set{}}
             public bool RightControllerSecondaryButtonPressed {get; private set;}
             
             public SensorData(int windowSize) {
-                _elbowDegs = new MovingAvg<float>(windowSize);
-                _shoulderAbductionDegs = new MovingAvg<float>(windowSize);
-                _shoulderFlexionDegs = new MovingAvg<float>(windowSize);
-                _headsetPositions = new MovingAvg<Vector3>(windowSize);
-                _rightControllerPositions = new MovingAvg<Vector3>(windowSize);
+                HeadsetRotation = new Quaternion();
+                RightControllerSecondaryButtonPressed = false;
+                _elbowDegs = new MovingAvgFloat(windowSize);
+                _shoulderAbductionDegs = new MovingAvgFloat(windowSize);
+                _shoulderFlexionDegs = new MovingAvgFloat(windowSize);
+                _headsetPositions = new MovingAvgVector3(windowSize);
+                _rightControllerPositions = new MovingAvgVector3(windowSize);
             }
             public bool MovingAvgsFilled() {
                 return _elbowDegs.Filled() && _shoulderAbductionDegs.Filled() && 

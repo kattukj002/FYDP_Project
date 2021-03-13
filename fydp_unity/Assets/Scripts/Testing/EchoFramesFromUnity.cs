@@ -21,11 +21,18 @@ public class EchoFramesFromUnity : MonoBehaviour
         arduino.WriteTimeout = SerialPort.InfiniteTimeout;
         arduino.Open();
 
-        armCmd = new BraceCmd(arduino);
+        armCmd = new BraceCmd(
+                arduino, 
+                elbow_:new MotorCmdFormat(
+                    torqueRatingNm:1.2f, torqueCmdFullScale:89, gearRatio:5, 
+                    stictionEncodedTorque:8),
+                shoulderDown_:new MotorCmdFormat(
+                    torqueRatingNm:1.89f, torqueCmdFullScale:89, gearRatio:5, 
+                    stictionEncodedTorque:8)
+                );
         
-        armCmd.elbow.SetTorque(1f);
-        armCmd.shoulderAbduction.SetTorque(2f);
-        armCmd.shoulderFlexion.SetTorque(3f);   
+        armCmd.elbow.SetTorqueMove(1f);
+        armCmd.shoulderDown.SetTorqueMove(2f);
         
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){

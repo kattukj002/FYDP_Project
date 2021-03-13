@@ -10,12 +10,12 @@ namespace FYDP {
         public class BraceCmd {
 
             public BraceCmd(SerialPort arduinoPort,
-                            MotorCmdFormat elbow,
-                            MotorCmdFormat shoulderDown) {
+                            MotorCmdFormat elbow_,
+                            MotorCmdFormat shoulderDown_) {
                 byte frameHeader = 0xC0;
 
-                _elbow = elbow;
-                _shoulderDown = shoulderDown;
+                elbow = elbow_;
+                shoulderDown = shoulderDown_;
 
                 _cmdFrameLength = 8;
                 _cmdFrame = new byte[_cmdFrameLength];
@@ -30,10 +30,10 @@ namespace FYDP {
 
             public void Send() {
 
-                _cmdFrame[2] = (byte)_elbow.Id;
-                _cmdFrame[3] = _elbow.Data;
-                _cmdFrame[4] = (byte)_shoulderDown.Id;
-                _cmdFrame[5] = _shoulderDown.Data;
+                _cmdFrame[2] = (byte)elbow.Id;
+                _cmdFrame[3] = elbow.Data;
+                _cmdFrame[4] = (byte)shoulderDown.Id;
+                _cmdFrame[5] = shoulderDown.Data;
                 // Zeroing out motor command until the embedded SW changes
                 _cmdFrame[6] = (byte)MotorCmdFormat.CmdTypeId.NoCmd;
                 _cmdFrame[7] = 0;
@@ -51,8 +51,8 @@ namespace FYDP {
             private byte[] _cmdFrame;
             private int _cmdFrameLength;
 
-            public MotorCmdFormat _elbow;
-            public MotorCmdFormat _shoulderDown;
+            public MotorCmdFormat elbow;
+            public MotorCmdFormat shoulderDown;
         }
     }
 }

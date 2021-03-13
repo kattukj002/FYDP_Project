@@ -28,12 +28,7 @@ namespace FYDP {
             }
 
             public bool TryInitSensors() {
-                if(!_useDummySensorReadings) {
-                    return _sensorReadings.TryInitSensors();
-                } else {
-                    _sensorReadings.UseDummySensorReadings(true);
-                }
-                return true;
+                return _sensorReadings.TryInitSensors();
             }
 
             public void CalculateJointTorques(Vector3 forceAtHand, 

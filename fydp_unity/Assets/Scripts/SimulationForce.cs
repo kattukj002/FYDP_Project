@@ -43,12 +43,12 @@ public class SimulationForce : MonoBehaviour
     private float ShoulderGearRatio = 4;
 
     private class ArmMotionEstimators {
-        public MotionEstimator<float> ElbowDeg;
-        public MotionEstimator<Vector3> RightControllerPosition;
+        public MotionEstimatorFloat ElbowDeg;
+        public MotionEstimatorVector3 RightControllerPosition;
 
         public ArmMotionEstimators(float timestepSeconds) {
-            ElbowDeg = new MotionEstimator<float>(timestepSeconds);
-            RightControllerPosition = new MotionEstimator<Vector3>(timestepSeconds);
+            ElbowDeg = new MotionEstimatorFloat(timestepSeconds);
+            RightControllerPosition = new MotionEstimatorVector3(timestepSeconds);
         }
         public void EstimateUnobtainableNewPosition() {
             ElbowDeg.EstimateUnobtainableNewPosition();
@@ -81,12 +81,12 @@ public class SimulationForce : MonoBehaviour
 
             _armCmd = new BraceCmd(
                 _arduinoPort, 
-                elbow:new MotorCmdFormat(
-                    torqueRatingNm:1.2, torqueCmdFullScale:89, gearRatio:5, 
+                elbow_:new MotorCmdFormat(
+                    torqueRatingNm:1.2f, torqueCmdFullScale:89, gearRatio:5, 
                     stictionEncodedTorque:8),
-                shoulderDown:new MotorCmdFormat(
-                    torqueRatingNm:1.89, torqueCmdFullScale:89, gearRatio:ShoulderGearRatio, 
-                    stictionEncodedTorque:8),
+                shoulderDown_:new MotorCmdFormat(
+                    torqueRatingNm:1.89f, torqueCmdFullScale:89, gearRatio:ShoulderGearRatio, 
+                    stictionEncodedTorque:8)
                 );
         }
 
@@ -206,9 +206,6 @@ public class SimulationForce : MonoBehaviour
             _armCmd.elbow.SetTorqueHold(elbowTorque);
         }
         
-        _armCmd.shoulderAbduction.SetTorqueHold(shoulderAbductionTorque);
-        _armCmd.shoulderFlexion.SetTorqueHold(shoulderFlexionTorque);
-
         _armCmd.Send();
     }
     
