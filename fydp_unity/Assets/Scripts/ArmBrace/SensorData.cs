@@ -3,34 +3,52 @@ using UnityEngine;
 namespace FYDP {
     namespace ArmBrace {
         public struct SensorData {
-            public float ElbowDeg {get; private set;}
-            public float ShoulderAbductionDeg {get; private set;} 
-            public float ShoulderFlexionDeg {get; private set;}
+            private MovingAvg<float> _elbowDegs;
+            private MovingAvg<float> _shoulderAbductionDegs;
+            private MovingAvg<float> _shoulderFlexionDegs;
+            private MovingAvg<Vector3> _headsetPositions;
+            private MovingAvg<Vector3> _rightControllerPositions;
+
+            public float ElbowDeg {get {return _elbowDegs.Avg;} private set;}
+            public float ShoulderAbductionDeg {get {return _shoulderAbductionDegs.Avg;} private set;}
+            public float ShoulderFlexionDeg {get {return _shoulderFlexionDegs.Avg;} private set;}
             public Quaternion HeadsetRotation {get; private set;}
-            public Vector3 HeadsetPosition {get; private set;}
-            public Vector3 RightControllerPosition {get; private set;}
-            public float RightControllerTrigger {get; private set;}
+            public Vector3 HeadsetPosition {get {return _headsetPositions.Avg;} private set;}
+            public Vector3 RightControllerPosition {get {return _rightControllerPositions.Avg;} private set;}
+            public bool RightControllerSecondaryButtonPressed {get; private set;}
             
-            public void OverwriteElbowDeg(float elbowDeg) {
-                ElbowDeg = elbowDeg;
+            public SensorData(int windowSize) {
+                _elbowDegs = new MovingAvg<float>(windowSize);
+                _shoulderAbductionDegs = new MovingAvg<float>(windowSize);
+                _shoulderFlexionDegs = new MovingAvg<float>(windowSize);
+                _headsetPositions = new MovingAvg<Vector3>(windowSize);
+                _rightControllerPositions = new MovingAvg<Vector3>(windowSize);
             }
-            public void OverwriteShoulderAbductionDeg(float shoulderAbductionDeg) {
-                ShoulderAbductionDeg = shoulderAbductionDeg;
+            public bool MovingAvgsFilled() {
+                return _elbowDegs.Filled() && _shoulderAbductionDegs.Filled() && 
+                    _shoulderFlexionDegs.Filled() && _headsetPositions.Filled() &&
+                    _rightControllerPositions.Filled();
             }
-            public void OverwriteShoulderFlexionDeg(float shoulderFlexionDeg) {
-                ShoulderFlexionDeg = shoulderFlexionDeg;
+            public void RecordElbowDeg(float elbowDeg) {
+                _elbowDegs.AddValue(elbowDeg);
             }
-            public void OverwriteHeadsetRotation(Quaternion headsetRotation) {
+            public void RecordShoulderAbductionDeg(float shoulderAbductionDeg) {
+                _shoulderAbductionDegs.AddValue(shoulderAbductionDeg);
+            }
+            public void RecordShoulderFlexionDeg(float shoulderFlexionDeg) {
+                _shoulderFlexionDegs.AddValue(shoulderFlexionDeg);
+            }
+            public void RecordHeadsetRotation(Quaternion headsetRotation) {
                 HeadsetRotation = headsetRotation;
             }
-            public void OverwriteHeadsetPosition(Vector3 headsetPosition) {
-                HeadsetPosition = headsetPosition;
+            public void RecordHeadsetPosition(Vector3 headsetPosition) {
+                _headsetPositions.AddValue(headsetPosition);
             }
-            public void OverwriteRightControllerPosition(Vector3 rightControllerPosition) {
-                RightControllerPosition = rightControllerPosition;
+            public void RecordRightControllerPosition(Vector3 rightControllerPosition) {
+                _rightControllerPositions.AddValue(rightControllerPosition);
             }
-            public void OverwriteRightControllerTrigger(float rightControllerTrigger) {
-                RightControllerTrigger = rightControllerTrigger;
+            public void RecordRightControllerSecondaryButtonPressed(bool rightControllerSecondaryButtonPressed) {
+                RightControllerSecondaryButtonPressed = rightControllerSecondaryButtonPressed;
             }
         }
     }

@@ -12,7 +12,7 @@ using UnityEditor;
 public class SimulationForce : MonoBehaviour
 {
     [SerializeField]
-    private float ArmMass = 2f;
+    private float ArmMass = 1f;
     [SerializeField]
     private bool UseDummyInputs = false;
     [SerializeField]
@@ -30,7 +30,7 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private int SerialWriteBufferSize = 16;
     [SerializeField]
-    private int sensorDataRelevanceLifetimeMs = 5000;
+    private int sensorDataRelevanceLifetimeMs = 500;
     [SerializeField]
     private float UpperArmLength = 0.3f;
     [SerializeField]
@@ -39,7 +39,31 @@ public class SimulationForce : MonoBehaviour
     private float ShoulderDistFromNeckBase = 0.25f;
     [SerializeField]
     private Vector3 NeckBaseOffsetFromHeadset = new Vector3(0, -0.22f, 0);
+    [SerializeField]
+    private float ShoulderGearRatio = 4;
 
+    private class ArmMotionEstimators {
+        public MotionEstimator<float> ElbowDeg;
+        public MotionEstimator<Vector3> RightControllerPosition;
+
+        public ArmMotionEstimators(float timestepSeconds) {
+            ElbowDeg = new MotionEstimator<float>(timestepSeconds);
+            RightControllerPosition = new MotionEstimator<Vector3>(timestepSeconds);
+        }
+        public void EstimateUnobtainableNewPosition() {
+            ElbowDeg.EstimateUnobtainableNewPosition();
+            RightControllerPosition.EstimateUnobtainableNewPosition();
+        }
+
+        public void UpdateNewPosition(SensorData sensorData) {
+            ElbowDeg.UpdateNewPosition(sensorData.ElbowDeg);
+            RightControllerPosition.UpdateNewPosition(sensorData.RightControllerPosition);
+        }
+
+        public bool Filled(){
+            return ElbowDeg.filled && RightControllerPosition.filled;
+        }
+    }
     void Start()
     {
         XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
@@ -55,7 +79,15 @@ public class SimulationForce : MonoBehaviour
             _arduinoPort.ReadBufferSize = SerialReadBufferSize;
             _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
 
-            _armCmd = new BraceCmd(_arduinoPort);
+            _armCmd = new BraceCmd(
+                _arduinoPort, 
+                elbow:new MotorCmdFormat(
+                    torqueRatingNm:1.2, torqueCmdFullScale:89, gearRatio:5, 
+                    stictionEncodedTorque:8),
+                shoulderDown:new MotorCmdFormat(
+                    torqueRatingNm:1.89, torqueCmdFullScale:89, gearRatio:ShoulderGearRatio, 
+                    stictionEncodedTorque:8),
+                );
         }
 
         CalibrationValues calibrationValues = new CalibrationValues();
@@ -73,7 +105,7 @@ public class SimulationForce : MonoBehaviour
                 useDummyInputs: UseDummyInputs,
                 printIntermediateValues: PrintIntermediateValues);
 
-        motionEstimator = new MotionEstimator(Time.fixedDeltaTime);
+        _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
 
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){
@@ -101,24 +133,35 @@ public class SimulationForce : MonoBehaviour
         _cachedMass = 0;
     }
 
+    int count = 0;
+    int period = 3;
     void FixedUpdate()
     {
-
         if(!_sensorReadings.Update()) {
             Debug.Log("Could not get updated sensor readings.");
-            motionEstimator.EstimateUnobtainableNewPosition();
+            _armMotionEstimators.EstimateUnobtainableNewPosition();
         } else {
-            motionEstimator.UpdateNewPosition(_sensorReadings.Data.RightControllerPosition);
+            count += 1;
+            if (count % period != 0) {
+                return;
+            }
+            count = 0;
+            _armMotionEstimators.UpdateNewPosition(_sensorReadings.Data); 
         }
-
-        if (_sensorReadings.Data.RightControllerTrigger != 0) {
+        
+        if (!_sensorReadings.Data.MovingAvgsFilled() || !_armMotionEstimators.Filled()) {
+            return;
+        }
+    
+        if (_sensorReadings.Data.RightControllerSecondaryButtonPressed) {
             Start();
             return;
         }
+
         _simForce = Physics.gravity*_cachedMass + _collisionForce;
     
         if (_cachedMass > 0){
-            _simForce += motionEstimator.EstimateAcceleration() * ArmMass * 
+            _simForce += _armMotionEstimators.RightControllerPosition.EstimateAcceleration() * ArmMass * 
                 _cachedMass / (ArmMass + _cachedMass);
         }
 
@@ -131,13 +174,12 @@ public class SimulationForce : MonoBehaviour
         if(PrintIntermediateValues) {
             Logging.PrintQty("SIM_FORCE", _simForce, "N");
             Logging.PrintQty("ELBOW_TORQUE", elbowTorque, "N-m");
+            Logging.PrintQty("ELBOW_DEG_VELOCITY", _armMotionEstimators.ElbowDeg.EstimateVelocity(), "deg/s");
             Logging.PrintQty("SHOULDER_ABDUCTION_TORQUE", shoulderAbductionTorque, "N-m");
             Logging.PrintQty("SHOULDER_FLEXION_TORQUE", shoulderFlexionTorque, "N-m");
         }
 
-        applyTorques(elbowTorque, 
-                            shoulderAbductionTorque, 
-                            shoulderFlexionTorque);
+        applyTorques(elbowTorque, shoulderAbductionTorque, shoulderFlexionTorque);
         _collisionForce.Set(0,0,0);
     }
 
@@ -155,9 +197,17 @@ public class SimulationForce : MonoBehaviour
     void applyTorques(float elbowTorque, float shoulderAbductionTorque, 
                       float shoulderFlexionTorque)
     {
-        _armCmd.elbow.SetTorque(-elbowTorque);
-        _armCmd.shoulderAbduction.SetTorque(shoulderAbductionTorque);
-        _armCmd.shoulderFlexion.SetTorque(shoulderFlexionTorque);
+        elbowTorque = -elbowTorque;
+        if (_armMotionEstimators.ElbowDeg.EstimateVelocity() != 0 && 
+            (_armMotionEstimators.ElbowDeg.EstimateVelocity() > 0) == (elbowTorque > 0)) {
+            
+            _armCmd.elbow.SetTorqueMove(elbowTorque);
+        } else {
+            _armCmd.elbow.SetTorqueHold(elbowTorque);
+        }
+        
+        _armCmd.shoulderAbduction.SetTorqueHold(shoulderAbductionTorque);
+        _armCmd.shoulderFlexion.SetTorqueHold(shoulderFlexionTorque);
 
         _armCmd.Send();
     }
@@ -169,7 +219,7 @@ public class SimulationForce : MonoBehaviour
     
     private BraceCmd _armCmd;
     private ArmVectorModel _armModel;
-    private MotionEstimator motionEstimator;
+    private ArmMotionEstimators _armMotionEstimators;
     private SerialPort _arduinoPort;
     private SensorReadings _sensorReadings;
 }

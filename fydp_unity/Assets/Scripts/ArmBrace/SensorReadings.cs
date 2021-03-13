@@ -11,54 +11,34 @@ namespace FYDP {
             
             public SensorReadings(
                 BraceSensorReader braceSensorReader,
-                TimeSpan dataRelevanceLifetime,
-                SensorData dummyData = new SensorData()) {
-                
-                _dummyData = dummyData;
+                TimeSpan dataRelevanceLifetime) {
                 
                 _braceSensorReader = braceSensorReader;
-                _useDummySensorReadings = false;
                 _currDataTimeStamp = DateTime.MinValue;
                 _dataRelevanceLifetime = dataRelevanceLifetime;
             }
             
-            // Initializes the data to dummy values. Edit this function
-            // for custom dummy values.
-            // TODO: Allow passing in custom dummy values for testing.
-            private void InitDummyReadings() {
-                Data = _dummyData;
-                _currDataTimeStamp = DateTime.MaxValue;
-            }
-
-            // Sets the class to use dummy sensor readings 
-            public void UseDummySensorReadings (
-                bool useDummySensorReadings) {
-                
-                _useDummySensorReadings = useDummySensorReadings;
-                if (_useDummySensorReadings) {
-                    InitDummyReadings();
-                }
-            }
-
             public bool TryInitSensors() {
-                if(_useDummySensorReadings) {
-                    return true;
-                }
                 bool initializedAllSensors = true;
 
-                if(!VRUtils.TryGetInputDevice(
-                    VRUtils.DeviceId.Headset, out _headset)) {
+                bool gotHeadset = VRUtils.TryGetInputDevice(
+                    VRUtils.DeviceId.Headset, out _headset); 
+                
+                if(!gotHeadset || !_headset.isValid) {
 
                     Debug.Log("Could not access headset.");
                     initializedAllSensors = false;
                 }
-                if(!VRUtils.TryGetInputDevice(
-                    VRUtils.DeviceId.RightController, 
-                    out _rightController)) {
+
+                bool gotRightController = VRUtils.TryGetInputDevice(
+                    VRUtils.DeviceId.RightController, out _rightController);
+
+                if(!gotRightController || !_rightController.isValid) {
                     
                     Debug.Log("Could not access right hand controller.");
                     initializedAllSensors = false;
                 }
+
                 _braceSensorReader.StartAsyncSensorReads();
                 return initializedAllSensors;
             }
@@ -66,14 +46,11 @@ namespace FYDP {
             // Tries to grab the updated sensor readings. If any sensors 
             // reads fail, reuse previous values if not stale.
             public bool Update() {
-                if(_useDummySensorReadings) {
-                    return true;
-                }
                 bool readFromAllSensors = true;
 
                 Quaternion tempHeadsetRotation;
                 Vector3 tempHeadsetPosition;   
-
+                
                 if (!_headset.TryGetFeatureValue(
                         CommonUsages.deviceRotation, 
                         out tempHeadsetRotation) || 
@@ -85,46 +62,42 @@ namespace FYDP {
                     
                     readFromAllSensors =  false;
                 } else {
-                    Data.OverwriteHeadsetRotation(tempHeadsetRotation);
-                    Data.OverwriteHeadsetPosition(tempHeadsetPosition);
+                    Data.RecordHeadsetRotation(tempHeadsetRotation);
+                    Data.RecordHeadsetPosition(tempHeadsetPosition);
                 }
 
                 Vector3 tempRightControllerPosition;
-                float tempRightControllerTrigger;
+                bool tempRightControllerSecondaryButtonPressed;
                 if (!_rightController.TryGetFeatureValue(
                         CommonUsages.devicePosition, 
                         out tempRightControllerPosition) || 
                     !_rightController.TryGetFeatureValue(
-                        CommonUsages.trigger, 
-                        out tempRightControllerTrigger)) {
+                        CommonUsages.secondaryButton, 
+                        out tempRightControllerSecondaryButtonPressed)) {
 
                     Debug.Log("Could not read from right controller sensors.");
                     
-                    // Assume button is not pressed if can't get the controller.
-                    Data.OverwriteRightControllerTrigger(0);
+                    Data.RecordRightControllerSecondaryButtonPressed(false);
                     readFromAllSensors =  false;
                 } else {
-                    Data.OverwriteRightControllerPosition(tempRightControllerPosition);
-                    Data.OverwriteRightControllerTrigger(tempRightControllerTrigger);
+                    Data.RecordRightControllerPosition(tempRightControllerPosition);
+                    Data.RecordRightControllerSecondaryButtonPressed(tempRightControllerSecondaryButtonPressed);
                 }
 
                 float tempElbowDeg; 
                 float tempShoulderAbductionDeg; 
                 float tempShoulderFlexionDeg;
                 
-                // if(!_braceSensorReader.GetJointAngles(
-                //     out tempElbowDeg, out tempShoulderAbductionDeg, 
-                //     out tempShoulderFlexionDeg)) {
+                if(!_braceSensorReader.GetJointAngles(
+                    out tempElbowDeg, out tempShoulderAbductionDeg, 
+                    out tempShoulderFlexionDeg)) {
 
-                //     readFromAllSensors =  false;
-                // } else {
-                //     Data.OverwriteElbowDeg(tempElbowDeg);
-                //     Data.OverwriteShoulderAbductionDeg(tempShoulderAbductionDeg);
-                //     Data.OverwriteShoulderFlexionDeg(tempShoulderFlexionDeg);
-                // }
-
-                Data.OverwriteShoulderAbductionDeg(0);
-                Data.OverwriteShoulderFlexionDeg(0);
+                    readFromAllSensors =  false;
+                } else {
+                    Data.RecordElbowDeg(tempElbowDeg);
+                    Data.RecordShoulderAbductionDeg(tempShoulderAbductionDeg);
+                    Data.RecordShoulderFlexionDeg(tempShoulderFlexionDeg);
+                }
 
                 if(readFromAllSensors) {
                     _currDataTimeStamp = DateTime.Now;
@@ -136,9 +109,7 @@ namespace FYDP {
             }
 
             public SensorData Data;
-            public SensorData _dummyData;
 
-            private bool _useDummySensorReadings;
             private DateTime _currDataTimeStamp;
             private TimeSpan _dataRelevanceLifetime;
             private InputDevice _headset;

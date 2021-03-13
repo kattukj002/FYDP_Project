@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using FYDP.Utils;
 
 namespace FYDP {
     namespace ArmBrace{
@@ -9,49 +10,67 @@ namespace FYDP {
             public enum CmdTypeId {
                 NoCmd = 0b_0000_0000,
                 NoTorque = 1,
-                SetTorqueCW = 2,
-                SetTorqueCCW = 3,
-                HoldTorque = 4
+                TorqueCW = 2,
+                TorqueCCW = 3,
+                TorqueHold = 4
             }
 
             public CmdTypeId Id {get; private set;}
             public byte Data {get; private set;}
             
+            private float _torqueRatingNm;
+            private float _torqueCmdFullScale;
+            private float _gearRatio;
+            private byte _stictionEncodedTorque;
+
+            public MotorCmdFormat(float torqueRatingNm, float torqueCmdFullScale, 
+                                  float gearRatio, byte stictionEncodedTorque) {
+                _torqueRatingNm = torqueRatingNm;
+                _torqueCmdFullScale = torqueCmdFullScale;
+                _gearRatio = gearRatio;
+                _stictionEncodedTorque = stictionEncodedTorque;
+            }
 
             //Augment this function with more adv. algorithm for more precision
             private byte EncodeTorque(float torque) {
-                return (byte)System.Math.Round(System.Math.Abs(torque), 0, 
-                                    System.MidpointRounding.AwayFromZero);
+
+                float encodedTorque = torque / _gearRatio / _TorqueRatingNm *
+                                      _torqueCmdFullScale;
+                
+                return (byte)Numeric.Clamp(Numeric.AbsRoundToWhole(
+                    encodedTorque), _torqueCmdFullScale);
             }
 
-            private float DecodeTorque(byte torque) {
-                return (float)torque;
+            private float DecodeTorque(byte encodedTorque) {
+                return (float)encodedTorque * _gearRatio * _TorqueRatingNm /
+                                      _torqueCmdFullScale;
             }
-            public void SetTorque(float torque) {
-                byte headerBits = 0xC0;
-                byte maxEncodableTorque = (byte)(~headerBits);
-                
+            public void SetNoTorque() {
+                Id = CmdTypeId.NoTorque;
+                Data = 0;
+            }
+            public void SetTorqueHold(float torque) {
                 if (torque == 0) {
-                    Id = CmdTypeId.NoTorque;
-                } else if (torque > 0) {
-                    Id = CmdTypeId.SetTorqueCCW;
+                    SetNoTorque();
+                    return;
+                }
+                Id = CmdTypeId.TorqueHold;
+                Data = EncodeTorque(torque);
+            }
+
+            public void SetTorqueMove(float torque) {
+                if (torque == 0) {
+                    SetNoTorque();
+                    return;
+                } 
+                
+                if (torque > 0) {
+                    Id = CmdTypeId.TorqueCCW;
                 }  
                 else {
-                    Id = CmdTypeId.SetTorqueCW;
+                    Id = CmdTypeId.TorqueCW;
                 }
-
-                byte encodedTorque = EncodeTorque(torque);
-
-                if ((headerBits & encodedTorque) > 0) {
-                    Debug.Log("Motor command torque exceeds the maximum " + 
-                                "magnitude " + 
-                                DecodeTorque(maxEncodableTorque).ToString() + 
-                                "N-m, max torque applied instead.");
-                        
-                    Data = maxEncodableTorque;
-                } else {
-                    Data = (byte)(encodedTorque + 8);
-                }
+                Data = EncodeTorque(torque) + stictionEncodedTorque;
             }
 
             public void SetNoCmd() {
