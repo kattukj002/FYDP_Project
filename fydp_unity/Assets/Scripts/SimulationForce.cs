@@ -172,11 +172,11 @@ public class SimulationForce : MonoBehaviour
             out float shoulderFlexionTorque);
 
         if(PrintIntermediateValues) {
-            Logging.PrintQty("SIM_FORCE", _simForce, "N");
-            Logging.PrintQty("ELBOW_TORQUE", elbowTorque, "N-m");
-            Logging.PrintQty("ELBOW_DEG_VELOCITY", _armMotionEstimators.ElbowDeg.EstimateVelocity(), "deg/s");
-            Logging.PrintQty("SHOULDER_ABDUCTION_TORQUE", shoulderAbductionTorque, "N-m");
-            Logging.PrintQty("SHOULDER_FLEXION_TORQUE", shoulderFlexionTorque, "N-m");
+            Logging.PrintQtyVector3("SIM_FORCE", _simForce, "N");
+            Logging.PrintQtyScalar("ELBOW_TORQUE", elbowTorque, "N-m");
+            Logging.PrintQtyScalar("ELBOW_DEG_VELOCITY", _armMotionEstimators.ElbowDeg.EstimateVelocity(), "deg/s");
+            Logging.PrintQtyScalar("SHOULDER_ABDUCTION_TORQUE", shoulderAbductionTorque, "N-m");
+            Logging.PrintQtyScalar("SHOULDER_FLEXION_TORQUE", shoulderFlexionTorque, "N-m");
         }
 
         applyTorques(elbowTorque, shoulderAbductionTorque, shoulderFlexionTorque);

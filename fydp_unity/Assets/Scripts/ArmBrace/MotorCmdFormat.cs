@@ -55,7 +55,7 @@ namespace FYDP {
                     return;
                 }
                 Id = CmdTypeId.TorqueHold;
-                Data = EncodeTorque(torque);
+                Data = (byte)EncodeTorque(torque);
             }
 
             public void SetTorqueMove(float torque) {
@@ -70,7 +70,7 @@ namespace FYDP {
                 else {
                     Id = CmdTypeId.TorqueCW;
                 }
-                Data = (byte)(EncodeTorque(torque) + _stictionEncodedTorque);
+                Data = (byte)EncodeTorque(torque + _stictionEncodedTorque);
             }
 
             public void SetNoCmd() {

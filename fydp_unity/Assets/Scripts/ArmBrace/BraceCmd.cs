@@ -40,8 +40,8 @@ namespace FYDP {
 
                 if(_arduinoPort.IsOpen) {
                     _arduinoPort.Write(_cmdFrame, 0, _cmdFrameLength);
-                    Logging.PrintQty("ELBOW_CMD_ID", elbow.Id);
-                    Logging.PrintQty("ELBOW_CMD_TORQUE", elbow.Data, "N");
+                    Logging.PrintQtyScalar("ELBOW_CMD_ID", (int)elbow.Id);
+                    Logging.PrintQtyScalar("ELBOW_CMD_TORQUE", elbow.Data, "N-m");
                 } else {
                     Debug.Log("Cannot send arm command: arduinoPort is" + 
                               " not open.");

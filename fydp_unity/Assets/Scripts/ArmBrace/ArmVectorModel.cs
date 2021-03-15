@@ -69,22 +69,22 @@ namespace FYDP {
                 elbowTorque *=-1;
 
                 if (_printIntermediateValues) {
-                    Logging.PrintQty("ELBOW_ANGLE", _sensorReadings.Data.ElbowDeg, "deg");
-                    Logging.PrintQty("SHOULDER_ABDUCTION_ANGLE", _sensorReadings.Data.ShoulderAbductionDeg, "deg");
-                    Logging.PrintQty("SHOULDER_FLEXION_ANGLE", _sensorReadings.Data.ShoulderFlexionDeg, "deg");
+                    Logging.PrintQtyScalar("ELBOW_ANGLE", _sensorReadings.Data.ElbowDeg, "deg");
+                    Logging.PrintQtyScalar("SHOULDER_ABDUCTION_ANGLE", _sensorReadings.Data.ShoulderAbductionDeg, "deg");
+                    Logging.PrintQtyScalar("SHOULDER_FLEXION_ANGLE", _sensorReadings.Data.ShoulderFlexionDeg, "deg");
 
-                    Logging.PrintQty("SHOULDER_POSITION", shoulderPosition, "m");
-                    Logging.PrintQty("ELBOW_POSITION", elbowPosition, "m");
+                    Logging.PrintQtyVector3("SHOULDER_POSITION", shoulderPosition, "m");
+                    Logging.PrintQtyVector3("ELBOW_POSITION", elbowPosition, "m");
                     
-                    Logging.PrintQty("SHOULDER_MOMENT: ", shoulderMoment, " N-m");
+                    Logging.PrintQtyVector3("SHOULDER_MOMENT: ", shoulderMoment, " N-m");
 
-                    Logging.PrintQty("SHOULDER_RIGHT_AXIS_VECTOR", rightShoulderAxisVector, "m");
-                    Logging.PrintQty("TORSO_FORWARD_AXIS_VECTOR", torsoForwardAxisVector, "m");
-                    Logging.PrintQty("TORSO_UP_AXIS_VECTOR", torsoUpUnitVector, "m");
-                    Logging.PrintQty("RIGHT_ELBOW_AXIS_VECTOR", elbowAxisVector, "m");
+                    Logging.PrintQtyVector3("SHOULDER_RIGHT_AXIS_VECTOR", rightShoulderAxisVector, "m");
+                    Logging.PrintQtyVector3("TORSO_FORWARD_AXIS_VECTOR", torsoForwardAxisVector, "m");
+                    Logging.PrintQtyVector3("TORSO_UP_AXIS_VECTOR", torsoUpUnitVector, "m");
+                    Logging.PrintQtyVector3("RIGHT_ELBOW_AXIS_VECTOR", elbowAxisVector, "m");
                     
-                    Logging.PrintQty("SHOULDER_MOMENT_ARM_VECTOR", shoulderMomentArm, " N-m");
-                    Logging.PrintQty("LOWER_ARM_VECTOR", lowerArmVector, " m");                    
+                    Logging.PrintQtyVector3("SHOULDER_MOMENT_ARM_VECTOR", shoulderMomentArm, " N-m");
+                    Logging.PrintQtyVector3("LOWER_ARM_VECTOR", lowerArmVector, " m");                    
                 }
             }
 
@@ -96,90 +96,22 @@ namespace FYDP {
                 out Vector3 elbowPosition,
                 out Vector3 elbowAxisVector,
                 out Vector3 lowerArmVector) {
-
-                Vector3 neckBasePosition = 
-                    _sensorReadings.Data.HeadsetRotation * _neckBaseOffsetFromHeadset + 
-                    _sensorReadings.Data.HeadsetPosition;
-
-                Vector3 neckBaseToHand = 
-                    _sensorReadings.Data.RightControllerPosition - neckBasePosition;
                 
-                // Cosine Law
-                float shoulderToHandLength = 
-                    Formulas.CosineLawCalcLength(
-                        _upperArmLength, _lowerArmLength, 
-                        Units.DegreesToRadians(_sensorReadings.Data.ElbowDeg));
-
-                float cos_NeckBaseHand_neckBaseShoulder_Angle = 
-                    Formulas.CosineLawCosAngle(neckBaseToHand.magnitude, 
-                                      _shoulderDistFromNeckBase,
-                                      shoulderToHandLength);
-                
-                Vector3 neckBaseToShoulder = Formulas.YPlaneLockedTwoBarStartMidVector(
-                    startEndVector: neckBaseToHand, 
-                    startMidLength: _shoulderDistFromNeckBase, 
-                    midEndLength: shoulderToHandLength, 
-                    cosLinkageAngle: cos_NeckBaseHand_neckBaseShoulder_Angle,
-                    prevStartMid: _prevNeckBaseToShoulder);
-
-                _prevNeckBaseToShoulder = neckBaseToShoulder;
-
-                shoulderPosition = neckBasePosition + neckBaseToShoulder;
-
-                rightShoulderAxisVector = neckBaseToShoulder.normalized;
-
+                rightShoulderAxisVector = Vector3.right;
+                elbowAxisVector = Vector3.right;
                 torsoUpAxisVector = Vector3.up;
-                torsoForwardAxisVector = Vector3.Cross(
-                    neckBaseToShoulder, torsoUpAxisVector).normalized;
-
-                Vector3 upperArmVector = Vector3.Cross(
-                        Quaternion.AngleAxis(_sensorReadings.Data.ShoulderFlexionDeg + 90, 
-                            rightShoulderAxisVector) * -torsoUpAxisVector,
-                        Quaternion.AngleAxis(_sensorReadings.Data.ShoulderAbductionDeg + 90, 
-                            torsoForwardAxisVector) * -torsoUpAxisVector).normalized
-                        * _upperArmLength;
-
-                if (Vector3.Equals(upperArmVector, Constants.ZeroVector)) {
-                    upperArmVector = Formulas.YPlaneLockedTwoBarStartMidVector(
-                        startEndVector: _sensorReadings.Data.RightControllerPosition - shoulderPosition, 
-                        startMidLength: _upperArmLength, 
-                        midEndLength: _lowerArmLength, 
-                        cosLinkageAngle: (float)Math.Cos(Units.DegreesToRadians(_sensorReadings.Data.ElbowDeg)),
-                        prevStartMid: _prevShoulderToElbow
-                    );
-                }
-                 _prevShoulderToElbow = upperArmVector;
+                torsoForwardAxisVector = Vector3.forward;
                 
-                elbowPosition = shoulderPosition + upperArmVector;
+                Quaternion dummyRot = Quaternion.AngleAxis(180 - _sensorReadings.Data.ElbowDeg, elbowAxisVector);
+                Vector3 upperArmVector = Vector3.down * _upperArmLength;
                 
-                lowerArmVector = _lowerArmLength * 
-                    (_sensorReadings.Data.RightControllerPosition - elbowPosition).normalized;
-
-                elbowAxisVector = Vector3.Cross(
-                    lowerArmVector, upperArmVector).normalized;
-                
-                if(Vector3.Equals(elbowAxisVector, Constants.ZeroVector)) {
-                    if(_cachedElbowAxis != Constants.ZeroVector) {
-                        elbowAxisVector = _cachedElbowAxis;
-                    } else {
-                        elbowAxisVector = rightShoulderAxisVector;
-                        _cachedElbowAxis = elbowAxisVector;
-                    }
-                } else {
-                    _cachedElbowAxis = elbowAxisVector;
-                }
+                lowerArmVector = (dummyRot * upperArmVector).normalized * _lowerArmLength;
+                elbowPosition = _sensorReadings.Data.RightControllerPosition - lowerArmVector; 
+                shoulderPosition = elbowPosition - upperArmVector;
 
                 if (_printIntermediateValues) {
-                    Logging.PrintQty("HEAD_POSITION", _sensorReadings.Data.HeadsetPosition);
-                    Logging.PrintQty("NECK_BASE_POSITION", neckBasePosition, "m");
-                    Logging.PrintQty("HAND_POSITION", _sensorReadings.Data.RightControllerPosition, "m");
-
-                    Logging.PrintQty("NECK_BASE_TO_HAND", neckBaseToHand, "m");
-                    Logging.PrintQty("SHOULDER_TO_HAND_LENGTH", shoulderToHandLength, "m");
-                    Logging.PrintQty("NECK_BASE_HAND_NECK_BASE_SHOULDER_ANGLE", 
-                        Units.RadiansToDegrees((float)Math.Acos(cos_NeckBaseHand_neckBaseShoulder_Angle)), "deg");
-                    Logging.PrintQty("NECK_BASE_TO_SHOULDER", neckBaseToShoulder, "m");
-                    Logging.PrintQty("UPPER_ARM_VECTOR", upperArmVector, " m");
+                    Logging.PrintQtyVector3("HAND_POSITION", _sensorReadings.Data.RightControllerPosition, "m");
+                    Logging.PrintQtyVector3("UPPER_ARM_VECTOR", upperArmVector, " m");
                 }
             }
             
