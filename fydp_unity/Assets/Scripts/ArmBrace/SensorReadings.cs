@@ -48,8 +48,8 @@ namespace FYDP {
             public bool Update() {
                 bool readFromAllSensors = true;
 
-                Quaternion tempHeadsetRotation;
-                Vector3 tempHeadsetPosition;   
+                Quaternion tempHeadsetRotation = new Quaternion();
+                Vector3 tempHeadsetPosition = new Vector3();   
                 
                 if (!_headset.TryGetFeatureValue(
                         CommonUsages.deviceRotation, 
@@ -66,7 +66,7 @@ namespace FYDP {
                     Data.RecordHeadsetPosition(tempHeadsetPosition);
                 }
 
-                Vector3 tempRightControllerPosition;
+                Vector3 tempRightControllerPosition = new Vector3();
                 bool tempRightControllerSecondaryButtonPressed;
                 if (!_rightController.TryGetFeatureValue(
                         CommonUsages.devicePosition, 
