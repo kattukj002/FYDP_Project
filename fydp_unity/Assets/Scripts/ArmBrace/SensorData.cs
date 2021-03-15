@@ -10,8 +10,8 @@ namespace FYDP {
             private MovingAvgVector3 _rightControllerPositions;
 
             public float ElbowDeg {get {return _elbowDegs.Avg;} private set{}}
-            public float ShoulderAbductionDeg {get {return _shoulderAbductionDegs.Avg;} private set{}}
-            public float ShoulderFlexionDeg {get {return _shoulderFlexionDegs.Avg;} private set{}}
+            public float ShoulderAbductionDeg {get {return 0;} private set{}}
+            public float ShoulderFlexionDeg {get {return 0;} private set{}}
             public Quaternion HeadsetRotation {get; private set;}
             public Vector3 HeadsetPosition {get {return _headsetPositions.Avg;} private set{}}
             public Vector3 RightControllerPosition {get {return _rightControllerPositions.Avg;} private set{}}
