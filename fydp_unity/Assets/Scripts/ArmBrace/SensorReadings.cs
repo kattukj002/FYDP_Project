@@ -13,7 +13,7 @@ namespace FYDP {
                 BraceSensorReader braceSensorReader,
                 TimeSpan dataRelevanceLifetime) {
                 
-                Data = new SensorData(1);
+                Data = new SensorData(100);
                 _braceSensorReader = braceSensorReader;
                 _currDataTimeStamp = DateTime.MinValue;
                 _dataRelevanceLifetime = dataRelevanceLifetime;

@@ -174,6 +174,7 @@ public class SimulationForce : MonoBehaviour
         if(PrintIntermediateValues) {
             Logging.PrintQtyVector3("SIM_FORCE", _simForce, "N");
             Logging.PrintQtyScalar("ELBOW_TORQUE", elbowTorque, "N-m");
+            Logging.PrintQtyScalar("HAND_ACCEL", _armMotionEstimators.RightControllerPosition.EstimateAcceleration(), "m/s_sqr");
             Logging.PrintQtyScalar("ELBOW_DEG_VELOCITY", _armMotionEstimators.ElbowDeg.EstimateVelocity(), "deg/s");
             Logging.PrintQtyScalar("SHOULDER_ABDUCTION_TORQUE", shoulderAbductionTorque, "N-m");
             Logging.PrintQtyScalar("SHOULDER_FLEXION_TORQUE", shoulderFlexionTorque, "N-m");
