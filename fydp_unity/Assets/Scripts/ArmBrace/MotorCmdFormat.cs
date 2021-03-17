@@ -72,7 +72,7 @@ namespace FYDP {
                 else {
                     Id = CmdTypeId.TorqueCW;
                 }
-                Data = (byte)EncodeTorque(torque, addStiction=true);
+                Data = (byte)EncodeTorque(torque, addStiction:true);
             }
 
             public void SetNoCmd() {
