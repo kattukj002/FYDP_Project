@@ -22,12 +22,12 @@ namespace FYDP {
                 _cmdFrame[0] = frameHeader;
                 _cmdFrame[1] = frameHeader;
 
-                _blankFrame = new byte[_cmdFrameLength];
-                _blankFrame[0] = frameHeader;
-                _blankFrame[1] = frameHeader;
-                for (int i = 2; i < _cmdFrameLength; i++) {
-                    _blankFrame[i] = 0;
-                }
+                // _blankFrame = new byte[_cmdFrameLength];
+                // _blankFrame[0] = frameHeader;
+                // _blankFrame[1] = frameHeader;
+                // for (int i = 2; i < _cmdFrameLength; i++) {
+                //     _blankFrame[i] = 0;
+                // }
 
                 _arduinoPort = arduinoPort;
                 if (!_arduinoPort.IsOpen) {
@@ -47,9 +47,9 @@ namespace FYDP {
 
                 if(_arduinoPort.IsOpen) {
                     Debug.Log("CMD_FRAME:" + BitConverter.ToString(_cmdFrame));
-                    _arduinoPort.Write(_blankFrame, 0, _cmdFrameLength);
+                    // _arduinoPort.Write(_blankFrame, 0, _cmdFrameLength);
                     _arduinoPort.Write(_cmdFrame, 0, _cmdFrameLength);
-                    _arduinoPort.Write(_blankFrame, 0, _cmdFrameLength);
+                    // _arduinoPort.Write(_blankFrame, 0, _cmdFrameLength);
                     Logging.PrintQtyScalar("ELBOW_CMD_ID", (int)elbow.Id);
                     Logging.PrintQtyScalar("ELBOW_CMD_TORQUE", elbow.Data, "N-m");
                 } else {
@@ -59,7 +59,7 @@ namespace FYDP {
             }
             private SerialPort _arduinoPort;
             private byte[] _cmdFrame;
-            private byte[] _blankFrame;
+            // private byte[] _blankFrame;
             private int _cmdFrameLength;
 
             public MotorCmdFormat elbow;
