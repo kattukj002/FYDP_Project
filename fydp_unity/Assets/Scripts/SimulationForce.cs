@@ -198,7 +198,7 @@ public class SimulationForce : MonoBehaviour
     void applyTorques(float elbowTorque, float shoulderAbductionTorque, 
                       float shoulderFlexionTorque)
     {
-        elbowTorque = -elbowTorque;
+        //elbowTorque = -elbowTorque;
         if (_armMotionEstimators.ElbowDeg.EstimateVelocity() != 0 && 
             (_armMotionEstimators.ElbowDeg.EstimateVelocity() > 0) == (elbowTorque > 0)) {
             
