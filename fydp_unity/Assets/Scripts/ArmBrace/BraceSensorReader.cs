@@ -102,7 +102,7 @@ namespace FYDP {
                             bytesRead = _arduinoPort.Read(buffer, 
                                                           0, 
                                                           readLength);
-                            Debug.Log("RAW_SERIAL:" + BitConverter.ToString(_cmdFrame));
+                            Debug.Log("RAW_SERIAL:" + BitConverter.ToString(bytesRead));
                         } catch (TimeoutException) {
                             continue;
                         }
