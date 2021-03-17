@@ -32,13 +32,15 @@ namespace FYDP {
             }
 
             //Augment this function with more adv. algorithm for more precision
-            private byte EncodeTorque(float torque) {
+            private byte EncodeTorque(float torque, bool addStiction=false) {
 
-                float encodedTorque = torque / _gearRatio / _torqueRatingNm *
-                                      _torqueCmdFullScale;
+                float encodedTorque = Numeric.AbsRoundToWhole(torque / _gearRatio / _torqueRatingNm *
+                                      _torqueCmdFullScale);
                 
-                return (byte)Numeric.Clamp(Numeric.AbsRoundToWhole(
-                    encodedTorque), _torqueCmdFullScale);
+                if (addStiction) {
+                    encodedTorque += _stictionEncodedTorque;
+                } 
+                return (byte)Numeric.Clamp(encodedTorque, _torqueCmdFullScale);
             }
 
             private float DecodeTorque(byte encodedTorque) {
@@ -70,7 +72,7 @@ namespace FYDP {
                 else {
                     Id = CmdTypeId.TorqueCW;
                 }
-                Data = (byte)EncodeTorque(torque + _stictionEncodedTorque);
+                Data = (byte)EncodeTorque(torque, addStiction=true);
             }
 
             public void SetNoCmd() {
