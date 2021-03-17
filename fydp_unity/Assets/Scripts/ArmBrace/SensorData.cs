@@ -23,8 +23,8 @@ namespace FYDP {
                 _elbowDegs = new MovingAvgFloat(windowSize);
                 _shoulderAbductionDegs = new MovingAvgFloat(windowSize);
                 _shoulderFlexionDegs = new MovingAvgFloat(windowSize);
-                _headsetPositions = new MovingAvgVector3(windowSize);
-                _rightControllerPositions = new MovingAvgVector3(windowSize);
+                _headsetPositions = new MovingAvgVector3(1);
+                _rightControllerPositions = new MovingAvgVector3(1);
             }
             public bool MovingAvgsFilled() {
                 return _elbowDegs.Filled() && _shoulderAbductionDegs.Filled() && 
