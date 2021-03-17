@@ -157,10 +157,10 @@ public class SimulationForce : MonoBehaviour
             return;
         }
     
-        // if (_sensorReadings.Data.RightControllerSecondaryButtonPressed) {
-        //     Start();
-        //     return;
-        // }
+        if (_sensorReadings.Data.RightControllerSecondaryButtonPressed) {
+            Start();
+            return;
+        }
 
         _simForce = Physics.gravity*_cachedMass + _collisionForce;
     
