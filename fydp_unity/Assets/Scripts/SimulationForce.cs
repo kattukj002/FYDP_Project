@@ -42,7 +42,7 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private float ShoulderGearRatio = 4;
     [SerializeField]
-    private float MotorPowerFraction = 0.5;
+    private float MotorPowerFraction = 0.5f;
 
     private class ArmMotionEstimators {
         public MotionEstimatorFloat ElbowDeg;
