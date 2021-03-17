@@ -41,6 +41,8 @@ public class SimulationForce : MonoBehaviour
     private Vector3 NeckBaseOffsetFromHeadset = new Vector3(0, -0.22f, 0);
     [SerializeField]
     private float ShoulderGearRatio = 4;
+    [SerializeField]
+    private float MotorPowerFraction = 0.5;
 
     private class ArmMotionEstimators {
         public MotionEstimatorFloat ElbowDeg;
@@ -82,10 +84,10 @@ public class SimulationForce : MonoBehaviour
             _armCmd = new BraceCmd(
                 _arduinoPort, 
                 elbow_:new MotorCmdFormat(
-                    torqueRatingNm:1.2f, torqueCmdFullScale:89, gearRatio:5, 
+                    torqueRatingNm:1.2f, torqueCmdFullScale:MotorPowerFraction * 89, gearRatio:5, 
                     stictionEncodedTorque:8),
                 shoulderDown_:new MotorCmdFormat(
-                    torqueRatingNm:1.89f, torqueCmdFullScale:89, gearRatio:ShoulderGearRatio, 
+                    torqueRatingNm:1.89f, torqueCmdFullScale:MotorPowerFraction * 89, gearRatio:ShoulderGearRatio, 
                     stictionEncodedTorque:8)
                 );
         }
