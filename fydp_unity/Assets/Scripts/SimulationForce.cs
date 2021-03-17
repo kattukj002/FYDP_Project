@@ -26,9 +26,9 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private int SerialReadTimeout = 1;
     [SerializeField]
-    private int SerialReadBufferSize = 16;
+    private int SerialReadBufferSize = 12;
     [SerializeField]
-    private int SerialWriteBufferSize = 16;
+    private int SerialWriteBufferSize = 8;
     [SerializeField]
     private int sensorDataRelevanceLifetimeMs = 500;
     [SerializeField]
