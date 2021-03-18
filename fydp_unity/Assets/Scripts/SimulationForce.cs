@@ -138,7 +138,7 @@ public class SimulationForce : MonoBehaviour
     }
 
     int count = 0;
-    int period = 3;
+    int period = 1;
     void FixedUpdate()
     {
         if(!_sensorReadings.Update()) {
@@ -203,7 +203,7 @@ public class SimulationForce : MonoBehaviour
                       float shoulderFlexionTorque)
     {
         //elbowTorque = -elbowTorque;
-        if (RemoveHoldCommands || _armMotionEstimators.ElbowDeg.EstimateVelocity() == 0 || 
+        if (RemoveHoldCommands || _armMotionEstimators.ElbowDeg.EstimateVelocity() == (1 << 5)/Time.fixedDeltaTime || 
             (_armMotionEstimators.ElbowDeg.EstimateVelocity() > 0) == (elbowTorque > 0)) {
             
             _armCmd.elbow.SetTorqueMove(elbowTorque);

@@ -97,10 +97,11 @@ namespace FYDP {
                 out Vector3 elbowAxisVector,
                 out Vector3 lowerArmVector) {
                 
-                rightShoulderAxisVector = Vector3.right;
-                elbowAxisVector = Vector3.right;
+                
+                rightShoulderAxisVector = _sensorReadings.Data.HeadsetRotation * Vector3.right;
+                elbowAxisVector = rightShoulderAxisVector;
                 torsoUpAxisVector = Vector3.up;
-                torsoForwardAxisVector = Vector3.forward;
+                torsoForwardAxisVector = _sensorReadings.Data.HeadsetRotation * Vector3.forward;
                 
                 Quaternion dummyRot = Quaternion.AngleAxis(180 - _sensorReadings.Data.ElbowDeg, elbowAxisVector);
                 Vector3 upperArmVector = Vector3.down * _upperArmLength;
