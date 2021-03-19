@@ -8,9 +8,14 @@ using FYDP.ArmBrace;
 using FYDP.VR;
 using FYDP.Utils;
 using UnityEditor;
+using UnityEngine.UI;
 
 public class SimulationForce : MonoBehaviour
 {
+
+    public Text txt;
+    public bool display_values = true;
+
     [SerializeField]
     private float ArmMass = 1f;
     [SerializeField]
@@ -174,6 +179,12 @@ public class SimulationForce : MonoBehaviour
             out float elbowTorque, 
             out float shoulderAbductionTorque, 
             out float shoulderFlexionTorque);
+
+        if (display_values)
+        {
+            txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
+            //txt.text = System.DateTime.Now.ToString();
+        }
 
         if(PrintIntermediateValues) {
             Logging.PrintQtyVector3("SIM_FORCE", _simForce, "N");
