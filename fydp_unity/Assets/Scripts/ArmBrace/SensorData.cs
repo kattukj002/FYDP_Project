@@ -8,6 +8,7 @@ namespace FYDP {
             private MovingAvgFloat _shoulderFlexionDegs;
             private MovingAvgVector3 _headsetPositions;
             private MovingAvgVector3 _rightControllerPositions;
+            private MovingAvgVector3 _rightControllerVelocities;
             private MovingAvgVector3 _leftControllerPositions;
 
             public float ElbowDeg {get {return _elbowDegs.Avg;} private set{}}
@@ -16,6 +17,7 @@ namespace FYDP {
             public Quaternion HeadsetRotation {get; private set;}
             public Vector3 HeadsetPosition {get {return _headsetPositions.Avg;} private set{}}
             public Vector3 RightControllerPosition {get {return _rightControllerPositions.Avg;} private set{}}
+            public Vector3 RightControllerVelocity {get {return _rightControllerVelocities.Avg;} private set{}}
             public Vector3 LeftControllerPosition {get {return _leftControllerPositions.Avg;} private set{}}
             public bool RightControllerSecondaryButtonPressed {get; private set;}
             
@@ -27,6 +29,7 @@ namespace FYDP {
                 _shoulderFlexionDegs = new MovingAvgFloat(windowSize);
                 _headsetPositions = new MovingAvgVector3(windowSize);
                 _rightControllerPositions = new MovingAvgVector3(windowSize);
+                _rightControllerVelocities = new MovingAvgVector3(windowSize);
                 _leftControllerPositions = new MovingAvgVector3(windowSize);
             }
             public bool MovingAvgsFilled() {
@@ -51,6 +54,9 @@ namespace FYDP {
             }
             public void RecordRightControllerPosition(Vector3 rightControllerPosition) {
                 _rightControllerPositions.AddValue(rightControllerPosition);
+            }
+            public void RecordRightControllerVelocity(Vector3 rightControllerVelocity) {
+                _rightControllerVelocities.AddValue(rightControllerVelocity);
             }
             public void RecordLeftControllerPosition(Vector3 leftControllerPosition) {
                 _leftControllerPositions.AddValue(leftControllerPosition);

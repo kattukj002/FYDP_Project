@@ -77,13 +77,17 @@ namespace FYDP {
                 }
 
                 Vector3 tempRightControllerPosition = new Vector3();
+                Vector3 tempRightControllerVelocity = new Vector3();
                 bool tempRightControllerSecondaryButtonPressed;
                 if (!_rightController.TryGetFeatureValue(
                         CommonUsages.devicePosition, 
                         out tempRightControllerPosition) || 
                     !_rightController.TryGetFeatureValue(
                         CommonUsages.secondaryButton, 
-                        out tempRightControllerSecondaryButtonPressed)) {
+                        out tempRightControllerSecondaryButtonPressed) ||
+                    !_rightController.TryGetFeatureValue(
+                        CommonUsages.deviceVelocity, 
+                        out tempRightControllerVelocity)) {
 
                     Debug.Log("Could not read from right controller sensors.");
                     
@@ -91,6 +95,7 @@ namespace FYDP {
                     readFromAllSensors =  false;
                 } else {
                     Data.RecordRightControllerPosition(tempRightControllerPosition);
+                    Data.RecordRightControllerVelocity(tempRightControllerVelocity);
                     Data.RecordRightControllerSecondaryButtonPressed(tempRightControllerSecondaryButtonPressed);
                 }
 
