@@ -216,7 +216,7 @@ public class SimulationForce : MonoBehaviour
     void applyTorques(float elbowTorque, float shoulderAbductionTorque, 
                       float shoulderFlexionTorque)
     {
-        //elbowTorque = -elbowTorque;
+        elbowTorque = -elbowTorque;
         if (RemoveHoldCommands || _armMotionEstimators.ElbowDeg.EstimateVelocity() == (1 << 5)/Time.fixedDeltaTime || 
             (_armMotionEstimators.ElbowDeg.EstimateVelocity() > 0) == (elbowTorque > 0)) {
             
