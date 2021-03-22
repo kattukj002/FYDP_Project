@@ -53,7 +53,8 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private bool UseLeftControllerAsElbowTracker = false;
     [SerializeField]
-    private float RightControllerVelocityThreshold = 0.2;
+    private float RightControllerVelocityThreshold = 0.2f;
+
     private class ArmMotionEstimators {
         public MotionEstimatorFloat ElbowDeg;
         public MotionEstimatorVector3 RightControllerPosition;
