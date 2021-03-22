@@ -113,7 +113,7 @@ namespace FYDP {
                     elbowPosition = _sensorReadings.Data.RightControllerPosition - lowerArmVector;    
                 } else {
                     elbowPosition = _sensorReadings.Data.LeftControllerPosition;
-                    lowerArmVector = sensorReadings.Data.RightControllerPosition - elbowPosition;
+                    lowerArmVector = _sensorReadings.Data.RightControllerPosition - elbowPosition;
                 }
                  
                 shoulderPosition = elbowPosition - upperArmVector;
