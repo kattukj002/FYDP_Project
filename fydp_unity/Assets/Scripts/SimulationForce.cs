@@ -219,8 +219,8 @@ public class SimulationForce : MonoBehaviour
                       float shoulderFlexionTorque)
     {
         bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
-            Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity() > 0) == Math.Sign(elbowTorque > 0) &&
-            Math.Sign(_sensorReadings.Data.RightControllerVelocity.y > 0) == Math.Sign(elbowTorque > 0) && 
+            Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
+            Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
             Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold);
 
         bool notMoving = Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold;
