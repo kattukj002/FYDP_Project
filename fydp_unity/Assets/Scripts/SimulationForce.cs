@@ -218,12 +218,14 @@ public class SimulationForce : MonoBehaviour
     void applyTorques(float elbowTorque, float shoulderAbductionTorque, 
                       float shoulderFlexionTorque)
     {
+        bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
+            Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity() > 0) == Math.Sign(elbowTorque > 0) &&
+            Math.Sign(_sensorReadings.Data.RightControllerVelocity.y > 0) == Math.Sign(elbowTorque > 0) && 
+            Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold);
+
+        bool notMoving = Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold;
         
-        if (RemoveHoldCommands || (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
-            (_armMotionEstimators.ElbowDeg.EstimateVelocity() > 0) == (elbowTorque > 0) &&
-            (_sensorReadings.Data.RightControllerVelocity.y > 0) == (elbowTorque > 0) && 
-            Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold) ||
-            Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold) {
+        if (RemoveHoldCommands || movementInSameDirAsTorque || notMoving) {
             
             elbowTorque = -elbowTorque;
             _armCmd.elbow.SetTorqueMove(elbowTorque);
