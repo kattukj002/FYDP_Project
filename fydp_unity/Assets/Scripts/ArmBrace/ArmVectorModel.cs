@@ -10,7 +10,8 @@ namespace FYDP {
             public ArmVectorModel(SensorReadings sensorReadings,  
                 CalibrationValues calibrationValues,
                 bool useDummyInputs=false,
-                bool printIntermediateValues=false) {
+                bool printIntermediateValues=false,
+                bool useLeftControllerAsElbowTracker=false) {
 
                 _upperArmLength = calibrationValues.UpperArmLength;
                 _lowerArmLength = calibrationValues.LowerArmLength;
@@ -19,6 +20,7 @@ namespace FYDP {
 
                 _useDummySensorReadings = useDummyInputs;
                 _printIntermediateValues = printIntermediateValues;
+                _useLeftControllerAsElbowTracker = useLeftControllerAsElbowTracker;
                
                _sensorReadings = sensorReadings;
                 _cachedElbowAxis = new Vector3(0,0,0);
@@ -106,8 +108,14 @@ namespace FYDP {
                 Quaternion dummyRot = Quaternion.AngleAxis(180 - _sensorReadings.Data.ElbowDeg, elbowAxisVector);
                 Vector3 upperArmVector = Vector3.down * _upperArmLength;
                 
-                lowerArmVector = (dummyRot * upperArmVector).normalized * _lowerArmLength;
-                elbowPosition = _sensorReadings.Data.RightControllerPosition - lowerArmVector; 
+                if (!_useLeftControllerAsElbowTracker) {
+                    lowerArmVector = (dummyRot * upperArmVector).normalized * _lowerArmLength;
+                    elbowPosition = _sensorReadings.Data.RightControllerPosition - lowerArmVector;    
+                } else {
+                    elbowPosition = _sensorReadings.Data.LeftControllerPosition;
+                    lowerArmVector = sensorReadings.Data.RightControllerPosition - elbowPosition;
+                }
+                 
                 shoulderPosition = elbowPosition - upperArmVector;
 
                 if (_printIntermediateValues) {
@@ -122,6 +130,7 @@ namespace FYDP {
             private Vector3 _neckBaseOffsetFromHeadset;
             private bool _useDummySensorReadings;
             private bool _printIntermediateValues;
+            private bool _useLeftControllerAsElbowTracker;
             private Vector3 _prevNeckBaseToShoulder;
             private Vector3 _prevShoulderToElbow;
             private SensorReadings _sensorReadings;

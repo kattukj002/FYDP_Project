@@ -45,6 +45,8 @@ public class SimulationForce : MonoBehaviour
     private float MotorPowerFraction = 0.5f;
     [SerializeField]
     private bool RemoveHoldCommands = false;
+    [SerializeField]
+    private bool UseLeftControllerAsElbowTracker = false;
 
     private class ArmMotionEstimators {
         public MotionEstimatorFloat ElbowDeg;
@@ -107,7 +109,8 @@ public class SimulationForce : MonoBehaviour
         _armModel = new ArmVectorModel(_sensorReadings,
                 calibrationValues, 
                 useDummyInputs: UseDummyInputs,
-                printIntermediateValues: PrintIntermediateValues);
+                printIntermediateValues: PrintIntermediateValues,
+                useLeftControllerAsElbowTracker: UseLeftControllerAsElbowTracker);
 
         _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
 

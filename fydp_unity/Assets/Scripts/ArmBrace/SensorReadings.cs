@@ -40,6 +40,15 @@ namespace FYDP {
                     initializedAllSensors = false;
                 }
 
+                bool gotLeftController = VRUtils.TryGetInputDevice(
+                    VRUtils.DeviceId.LeftController, out _leftController);
+
+                if(!gotLeftController || !_leftController.isValid) {
+                    
+                    Debug.Log("Could not access left hand controller.");
+                    initializedAllSensors = false;
+                }
+
                 _braceSensorReader.StartAsyncSensorReads();
                 return initializedAllSensors;
             }
@@ -85,6 +94,18 @@ namespace FYDP {
                     Data.RecordRightControllerSecondaryButtonPressed(tempRightControllerSecondaryButtonPressed);
                 }
 
+                Vector3 tempLeftControllerPosition = new Vector3();
+                if (!_leftController.TryGetFeatureValue(
+                        CommonUsages.devicePosition, 
+                        out tempLeftControllerPosition)) {
+
+                    Debug.Log("Could not read from left controller sensors.");
+                    
+                    readFromAllSensors =  false;
+                } else {
+                    Data.RecordLeftControllerPosition(tempLeftControllerPosition);
+                }
+
                 float tempElbowDeg; 
                 float tempShoulderAbductionDeg; 
                 float tempShoulderFlexionDeg;
@@ -115,6 +136,7 @@ namespace FYDP {
             private TimeSpan _dataRelevanceLifetime;
             private InputDevice _headset;
             private InputDevice _rightController;
+            private InputDevice _leftController;
             private BraceSensorReader _braceSensorReader;
         }
     }
