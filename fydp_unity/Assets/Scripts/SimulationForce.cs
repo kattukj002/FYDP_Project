@@ -219,7 +219,8 @@ public class SimulationForce : MonoBehaviour
         elbowTorque = -elbowTorque;
         if (RemoveHoldCommands || (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
             (_armMotionEstimators.ElbowDeg.EstimateVelocity() > 0) == (elbowTorque > 0) && 
-            _sensorReadings.Data.RightControllerVelocity.magnitude > 0.1)) {
+            _sensorReadings.Data.RightControllerVelocity.magnitude > 0.1) ||
+            _sensorReadings.Data.RightControllerVelocity.magnitude < 0.1) {
             
             _armCmd.elbow.SetTorqueMove(elbowTorque);
         } else {
