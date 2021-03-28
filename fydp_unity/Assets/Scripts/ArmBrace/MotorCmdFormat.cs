@@ -12,7 +12,8 @@ namespace FYDP {
                 NoTorque = 1,
                 TorqueCW = 2,
                 TorqueCCW = 3,
-                TorqueHold = 4
+                TorqueHold = 4,
+                KeepCableTense = 22
             }
 
             public CmdTypeId Id {get; private set;}
@@ -22,13 +23,21 @@ namespace FYDP {
             private float _torqueCmdFullScale;
             private float _gearRatio;
             private byte _stictionEncodedTorque;
+            private CmdTypeId _idleCmdType;
 
             public MotorCmdFormat(float torqueRatingNm, float torqueCmdFullScale, 
-                                  float gearRatio, byte stictionEncodedTorque) {
+                                  float gearRatio, byte stictionEncodedTorque,
+                                  bool isCableMotor=false) {
                 _torqueRatingNm = torqueRatingNm;
                 _torqueCmdFullScale = torqueCmdFullScale;
                 _gearRatio = gearRatio;
                 _stictionEncodedTorque = stictionEncodedTorque;
+                
+                if (isCableMotor) {
+                    _idleCmdType = CmdTypeId.KeepCableTense;
+                } else {
+                    _idleCmdType = CmdTypeId.NoTorque;
+                }
             }
 
             //Augment this function with more adv. algorithm for more precision
@@ -47,13 +56,13 @@ namespace FYDP {
                 return (float)encodedTorque * _gearRatio * _torqueRatingNm /
                                       _torqueCmdFullScale;
             }
-            public void SetNoTorque() {
-                Id = CmdTypeId.NoTorque;
+            public void SetToIdle() {
+                Id = _idleCmdType;
                 Data = 0;
             }
             public void SetTorqueHold(float torque) {
                 if (torque == 0) {
-                    SetNoTorque();
+                    SetToIdle();
                     return;
                 }
                 Id = CmdTypeId.TorqueHold;
@@ -62,7 +71,7 @@ namespace FYDP {
 
             public void SetTorqueMove(float torque) {
                 if (torque == 0) {
-                    SetNoTorque();
+                    SetToIdle();
                     return;
                 } 
                 

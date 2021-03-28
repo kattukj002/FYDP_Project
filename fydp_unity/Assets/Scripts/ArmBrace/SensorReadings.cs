@@ -19,7 +19,8 @@ namespace FYDP {
                 _dataRelevanceLifetime = dataRelevanceLifetime;
             }
             
-            public bool TryInitSensors() {
+
+            public bool TryInitSensors(float upperArmLength, Vector3 neckBaseOffsetFromHeadset, float shoulderDistFromNeckBase, float imuSensorMsgFreq) {
                 bool initializedAllSensors = true;
 
                 bool gotHeadset = VRUtils.TryGetInputDevice(
@@ -49,6 +50,30 @@ namespace FYDP {
                     initializedAllSensors = false;
                 }
 
+                Quaternion headsetRotation = new Quaternion();
+                Vector3 headsetPosition = new Vector3();   
+                if(!_headset.TryGetFeatureValue(
+                        CommonUsages.devicePosition, 
+                        out headsetPosition) ||
+                    !_headset.TryGetFeatureValue(
+                        CommonUsages.deviceRotation, 
+                        out headsetRotation)) {
+                    Debug.Log("Could not read from headset sensors.");
+                    initializedAllSensors = false;
+                }
+
+                Vector3 neckBase = (headsetRotation * neckBaseOffsetFromHeadset) + headsetPosition;
+                Vector3 shoulderPosition = neckBase + headsetRotation * (shoulderDistFromNeckBase * Vector3.right);
+
+                Logging.PrintQtyVector3("HEADSET_ROTATION_IMU", headsetRotation.eulerAngles, "deg");
+                Logging.PrintQtyVector3("HEADSET_POSITION_IMU", headsetPosition, "m"); 
+                Logging.PrintQtyVector3("NECK_BASE_IMU", neckBase, "m");
+                Logging.PrintQtyVector3("SHOULDER_POSITION_IMU", shoulderPosition, "m");
+
+                _braceSensorReader.SetImuEstimator(new ImuEstimator(
+                    initialPosition: shoulderPosition + Vector3.down * upperArmLength,
+                    globalToInitialCorrected: headsetRotation,
+                    timestepSeconds:imuSensorMsgFreq));
                 _braceSensorReader.StartAsyncSensorReads();
                 return initializedAllSensors;
             }
@@ -111,20 +136,23 @@ namespace FYDP {
                     Data.RecordLeftControllerPosition(tempLeftControllerPosition);
                 }
 
-                float tempElbowDeg; 
-                float tempShoulderAbductionDeg; 
-                float tempShoulderFlexionDeg;
-                
-                if(!_braceSensorReader.GetJointAngles(
-                    out tempElbowDeg, out tempShoulderAbductionDeg, 
-                    out tempShoulderFlexionDeg)) {
+                float tempElbowDeg;  
+                Vector3 tempPositionEstimate; 
+                Vector3 tempElbowAxisEstimate;
+                Vector3 tempUpperArmAxisEstimate;
+
+                if(!_braceSensorReader.GetBraceSensorData(out tempElbowDeg, 
+                out tempPositionEstimate, out tempElbowAxisEstimate,
+                out tempUpperArmAxisEstimate)) {
 
                     readFromAllSensors =  false;
                 } else {
                     Data.RecordElbowDeg(tempElbowDeg);
-                    Data.RecordShoulderAbductionDeg(tempShoulderAbductionDeg);
-                    Data.RecordShoulderFlexionDeg(tempShoulderFlexionDeg);
                 }
+
+                Data.RecordElbowPositionEstimate(tempPositionEstimate);
+                Data.RecordElbowAxisEstimate(tempElbowAxisEstimate);
+                Data.RecordUpperArmAxisEstimate(tempUpperArmAxisEstimate);
 
                 if(readFromAllSensors) {
                     _currDataTimeStamp = DateTime.Now;

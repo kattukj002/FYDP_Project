@@ -4,6 +4,7 @@ using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using System.IO.Ports;
 using System;
+using System.Threading;
 using FYDP.ArmBrace;
 using FYDP.VR;
 using FYDP.Utils;
@@ -31,7 +32,7 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private int SerialReadTimeout = 1;
     [SerializeField]
-    private int SerialReadBufferSize = 12;
+    private int SerialReadBufferSize = 24;
     [SerializeField]
     private int SerialWriteBufferSize = 8;
     [SerializeField]
@@ -45,7 +46,11 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private Vector3 NeckBaseOffsetFromHeadset = new Vector3(0, -0.22f, 0);
     [SerializeField]
-    private float ShoulderGearRatio = 4;
+    private Vector3 CableMotorOffsetfromShoulder = new Vector3(0, -0.3f, 0);
+    [SerializeField]
+    public float CableWinchRadius = 0.07f;
+    [SerializeField]
+    private float ShoulderGearRatio = 1f;
     [SerializeField]
     private float MotorPowerFraction = 0.5f;
     [SerializeField]
@@ -53,7 +58,11 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private bool UseLeftControllerAsElbowTracker = false;
     [SerializeField]
+    private bool IgnoreImu = false;
+    [SerializeField]
     private float RightControllerVelocityThreshold = 0.2f;
+    [SerializeField]
+    private float ImuSensorMsgFreq = 0.05f;
 
     private class ArmMotionEstimators {
         public MotionEstimatorFloat ElbowDeg;
@@ -99,7 +108,7 @@ public class SimulationForce : MonoBehaviour
                     stictionEncodedTorque:8),
                 shoulderDown_:new MotorCmdFormat(
                     torqueRatingNm:1.89f, torqueCmdFullScale:MotorPowerFraction * 89, gearRatio:ShoulderGearRatio, 
-                    stictionEncodedTorque:8)
+                    stictionEncodedTorque:8, isCableMotor:true)
                 );
         }
 
@@ -108,7 +117,10 @@ public class SimulationForce : MonoBehaviour
         calibrationValues.LowerArmLength = LowerArmLength;
         calibrationValues.ShoulderDistFromNeckBase = ShoulderDistFromNeckBase;
         calibrationValues.NeckBaseOffsetFromHeadset = NeckBaseOffsetFromHeadset;
-        
+        calibrationValues.CableMotorOffsetfromShoulder = CableMotorOffsetfromShoulder;
+        calibrationValues.CableWinchRadius = CableWinchRadius;
+        calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
+
         _sensorReadings = new SensorReadings(
             new BraceSensorReader(_arduinoPort), 
             TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
@@ -117,7 +129,8 @@ public class SimulationForce : MonoBehaviour
                 calibrationValues, 
                 useDummyInputs: UseDummyInputs,
                 printIntermediateValues: PrintIntermediateValues,
-                useLeftControllerAsElbowTracker: UseLeftControllerAsElbowTracker);
+                useLeftControllerAsElbowTracker: UseLeftControllerAsElbowTracker,
+                ignoreImu:IgnoreImu);
 
         _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
 
@@ -179,11 +192,9 @@ public class SimulationForce : MonoBehaviour
                 _cachedMass / (ArmMass + _cachedMass);
         }
 
-        _armModel.CalculateJointTorques(
-            forceAtHand: _simForce,
-            out float elbowTorque, 
-            out float shoulderAbductionTorque, 
-            out float shoulderFlexionTorque);
+        _armModel.CalculateMotorTorques(_simForce, 
+                                        out float elbowTorque, 
+                                        out float cableMotorTorque);
 
         if (display_values)
         {
@@ -196,11 +207,10 @@ public class SimulationForce : MonoBehaviour
             Logging.PrintQtyScalar("ELBOW_TORQUE", elbowTorque, "N-m");
             Logging.PrintQtyVector3("HAND_ACCEL", _armMotionEstimators.RightControllerPosition.EstimateAcceleration(), "m/s_sqr");
             Logging.PrintQtyScalar("ELBOW_DEG_VELOCITY", _armMotionEstimators.ElbowDeg.EstimateVelocity(), "deg/s");
-            Logging.PrintQtyScalar("SHOULDER_ABDUCTION_TORQUE", shoulderAbductionTorque, "N-m");
-            Logging.PrintQtyScalar("SHOULDER_FLEXION_TORQUE", shoulderFlexionTorque, "N-m");
+            Logging.PrintQtyScalar("CABLE_MOTOR_TORQUE", cableMotorTorque, "N-m");
         }
 
-        applyTorques(elbowTorque, shoulderAbductionTorque, shoulderFlexionTorque);
+        applyTorques(elbowTorque, cableMotorTorque);
         _collisionForce.Set(0,0,0);
     }
 
@@ -215,28 +225,38 @@ public class SimulationForce : MonoBehaviour
         _collisionForce.Set(0,0,0);
     }
 
-    void applyTorques(float elbowTorque, float shoulderAbductionTorque, 
-                      float shoulderFlexionTorque)
+    void applyTorques(float elbowTorque, float cableMotorTorque)
     {
-        bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
-            Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
-            Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
-            Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold);
+        if(armCmdMutex.WaitOne(1)) {
+            bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
+                Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
+                Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
+                Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold);
 
-        bool notMoving = Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold;
-        
-        if (RemoveHoldCommands || movementInSameDirAsTorque || notMoving) {
+            bool notMoving = Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold;
             
-            elbowTorque = -elbowTorque;
-            _armCmd.elbow.SetTorqueMove(elbowTorque);
-        } else {
-            elbowTorque = -elbowTorque;
-            _armCmd.elbow.SetTorqueHold(elbowTorque);
+            if (RemoveHoldCommands || movementInSameDirAsTorque || notMoving) {
+                
+                elbowTorque = -elbowTorque;
+                _armCmd.elbow.SetTorqueMove(elbowTorque);
+            } else {
+                elbowTorque = -elbowTorque;
+                _armCmd.elbow.SetTorqueHold(elbowTorque);
+            }
+            _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
+            newCmdReady = true;
+            armCmdMutex.ReleaseMutex();
         }
-        
-        _armCmd.Send();
     }
-    
+    void Update() {
+        if(newCmdReady && armCmdMutex.WaitOne(1)) {
+            _armCmd.Send();
+            newCmdReady = false;
+            armCmdMutex.ReleaseMutex();
+        }
+    }
+    private Mutex armCmdMutex;
+    private bool newCmdReady;
     private Vector3 _simForce;
     public float _cachedMass = 0f;
     private Vector3 _collisionForce = new Vector3(0,0,0);
