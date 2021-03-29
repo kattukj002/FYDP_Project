@@ -55,17 +55,17 @@ namespace FYDP {
                     byteArray[1], byteArray[0]);
 
                 sensorDataBuffer.ImuXAcceleration = DecodeImuAccelerationBytes(
-                    byteArray[10], byteArray[9]);
+                    byteArray[11], byteArray[10]);
                 sensorDataBuffer.ImuYAcceleration = DecodeImuAccelerationBytes(
-                    byteArray[12], byteArray[11]);
+                    byteArray[13], byteArray[12]);
                 sensorDataBuffer.ImuZAcceleration  = DecodeImuAccelerationBytes(
-                    byteArray[14], byteArray[13]);
+                    byteArray[15], byteArray[14]);
                 sensorDataBuffer.ImuXAngularVelocity = DecodeImuAngularVelocityBytes(
-                    byteArray[16], byteArray[15]);
+                    byteArray[17], byteArray[16]);
                 sensorDataBuffer.ImuYAngularVelocity = DecodeImuAngularVelocityBytes(
-                    byteArray[18], byteArray[17]);
+                    byteArray[19], byteArray[18]);
                 sensorDataBuffer.ImuZAngularVelocity = DecodeImuAngularVelocityBytes(
-                    byteArray[20], byteArray[19]); 
+                    byteArray[21], byteArray[20]); 
             }
 
             ~BraceSensorReader() {
