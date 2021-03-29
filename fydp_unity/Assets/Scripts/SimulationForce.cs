@@ -86,6 +86,7 @@ public class SimulationForce : MonoBehaviour
             return ElbowDeg.filled && RightControllerPosition.filled;
         }
     }
+    private bool _started = false;
     void Start()
     {
         XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
@@ -93,13 +94,19 @@ public class SimulationForce : MonoBehaviour
         controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
 
         if(!UseDummyInputs) {
-            _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
-        
-            //Will need to look into the correct values for this.
-            _arduinoPort.WriteTimeout = SerialWriteTimeout;
-            _arduinoPort.ReadTimeout = SerialReadTimeout;
-            _arduinoPort.ReadBufferSize = SerialReadBufferSize;
-            _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
+
+            if(!started) {
+                _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
+                _arduinoPort.Open();
+
+                //Will need to look into the correct values for this.
+                _arduinoPort.WriteTimeout = SerialWriteTimeout;
+                _arduinoPort.ReadTimeout = SerialReadTimeout;
+                _arduinoPort.ReadBufferSize = SerialReadBufferSize;
+                _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
+
+                _started = true;
+            }
 
             _armCmd = new BraceCmd(
                 _arduinoPort, 
