@@ -26,7 +26,7 @@ namespace FYDP {
                 _useLeftControllerAsElbowTracker = useLeftControllerAsElbowTracker;
                
                _ignoreImu = ignoreImu;
-               _sensorReadings = sensorReadings;
+                _sensorReadings = sensorReadings;
                 _sensorReadings.TryInitSensors(_upperArmLength, _neckBaseOffsetFromHeadset, _shoulderDistFromNeckBase, calibrationValues.ImuSensorMsgFreq);
             }
 

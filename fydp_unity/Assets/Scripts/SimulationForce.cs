@@ -171,6 +171,9 @@ public class SimulationForce : MonoBehaviour
     int period = 1;
     void FixedUpdate()
     {
+        if(_sensorReadings == null) {
+            return;
+        }
         if(!_sensorReadings.Update()) {
             Debug.Log("Could not get updated sensor readings.");
             _armMotionEstimators.EstimateUnobtainableNewPosition();
@@ -273,5 +276,5 @@ public class SimulationForce : MonoBehaviour
     private ArmVectorModel _armModel;
     private ArmMotionEstimators _armMotionEstimators;
     private SerialPort _arduinoPort;
-    private SensorReadings _sensorReadings;
+    private SensorReadings _sensorReadings = null;
 }
