@@ -184,57 +184,59 @@ public class SimulationForce : MonoBehaviour
     int period = 1;
     void FixedUpdate()
     {
-        if(_sensorReadings == null) {
-            return;
-        }
-        if(!_sensorReadings.Update()) {
-            Debug.Log("Could not get updated sensor readings.");
-            _armMotionEstimators.EstimateUnobtainableNewPosition();
-        } else {
-            count += 1;
-            if (count % period != 0) {
-                return;
-            }
-            count = 0;
-            _armMotionEstimators.UpdateNewPosition(_sensorReadings.Data); 
-        }
-        if (!FinalTestDisable) {
-            if (!_sensorReadings.Data.MovingAvgsFilled() || !_armMotionEstimators.Filled()) {
-                return;
-            }
-        }
+        // if(_sensorReadings == null) {
+        //     return;
+        // }
+        // if(!_sensorReadings.Update()) {
+        //     Debug.Log("Could not get updated sensor readings.");
+        //     _armMotionEstimators.EstimateUnobtainableNewPosition();
+        // } else {
+        //     count += 1;
+        //     if (count % period != 0) {
+        //         return;
+        //     }
+        //     count = 0;
+        //     _armMotionEstimators.UpdateNewPosition(_sensorReadings.Data); 
+        // }
+        // if (!FinalTestDisable) {
+        //     if (!_sensorReadings.Data.MovingAvgsFilled() || !_armMotionEstimators.Filled()) {
+        //         return;
+        //     }
+        // }
         
-        if (_sensorReadings.Data.RightControllerSecondaryButtonPressed) {
-            ReleaseResources();
-            Start();
-            return;
-        }
-        _simForce = Physics.gravity*_cachedMass + _collisionForce;
+        // if (_sensorReadings.Data.RightControllerSecondaryButtonPressed) {
+        //     ReleaseResources();
+        //     Start();
+        //     return;
+        // }
+        // _simForce = Physics.gravity*_cachedMass + _collisionForce;
     
-        if (_cachedMass > 0){
-            _simForce += _armMotionEstimators.RightControllerPosition.EstimateAcceleration() * ArmMass * 
-                _cachedMass / (ArmMass + _cachedMass);
-        }
+        // if (_cachedMass > 0){
+        //     _simForce += _armMotionEstimators.RightControllerPosition.EstimateAcceleration() * ArmMass * 
+        //         _cachedMass / (ArmMass + _cachedMass);
+        // }
 
-        _armModel.CalculateMotorTorques(_simForce, 
-                                        out float elbowTorque, 
-                                        out float cableMotorTorque);
+        // _armModel.CalculateMotorTorques(_simForce, 
+        //                                 out float elbowTorque, 
+        //                                 out float cableMotorTorque);
         
-        if (!FinalTestDisable) {
-            if (display_values)
-            {
-                txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
-                //txt.text = System.DateTime.Now.ToString();
-            }
-        }
+        // if (!FinalTestDisable) {
+        //     if (display_values)
+        //     {
+        //         txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
+        //         //txt.text = System.DateTime.Now.ToString();
+        //     }
+        // }
 
-        if(PrintIntermediateValues) {
-            Logging.PrintQtyVector3("SIM_FORCE", _simForce, "N");
-            Logging.PrintQtyScalar("ELBOW_TORQUE", elbowTorque, "N-m");
-            Logging.PrintQtyVector3("HAND_ACCEL", _armMotionEstimators.RightControllerPosition.EstimateAcceleration(), "m/s_sqr");
-            Logging.PrintQtyScalar("ELBOW_DEG_VELOCITY", _armMotionEstimators.ElbowDeg.EstimateVelocity(), "deg/s");
-            Logging.PrintQtyScalar("CABLE_MOTOR_TORQUE", cableMotorTorque, "N-m");
-        }
+        // if(PrintIntermediateValues) {
+        //     Logging.PrintQtyVector3("SIM_FORCE", _simForce, "N");
+        //     Logging.PrintQtyScalar("ELBOW_TORQUE", elbowTorque, "N-m");
+        //     Logging.PrintQtyVector3("HAND_ACCEL", _armMotionEstimators.RightControllerPosition.EstimateAcceleration(), "m/s_sqr");
+        //     Logging.PrintQtyScalar("ELBOW_DEG_VELOCITY", _armMotionEstimators.ElbowDeg.EstimateVelocity(), "deg/s");
+        //     Logging.PrintQtyScalar("CABLE_MOTOR_TORQUE", cableMotorTorque, "N-m");
+        // }
+        float elbowTorque = 0;
+        float cableMotorTorque = 0;
         applyTorques(elbowTorque, cableMotorTorque);
         _collisionForce.Set(0,0,0);
     }
