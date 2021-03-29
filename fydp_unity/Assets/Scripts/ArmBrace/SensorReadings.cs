@@ -20,7 +20,7 @@ namespace FYDP {
             }
 
             public void ReleaseResources() {
-                braceSensorReader.StopAsyncSensorReads();
+                _braceSensorReader.StopAsyncSensorReads();
             }
             
 
