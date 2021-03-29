@@ -129,28 +129,28 @@ public class SimulationForce : MonoBehaviour
                 );
         }
 
-        CalibrationValues calibrationValues = new CalibrationValues();
-        calibrationValues.UpperArmLength = UpperArmLength;
-        calibrationValues.LowerArmLength = LowerArmLength;
-        calibrationValues.ShoulderDistFromNeckBase = ShoulderDistFromNeckBase;
-        calibrationValues.NeckBaseOffsetFromHeadset = NeckBaseOffsetFromHeadset;
-        calibrationValues.CableMotorOffsetfromShoulder = CableMotorOffsetfromShoulder;
-        calibrationValues.CableWinchRadius = CableWinchRadius;
-        calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
+        // CalibrationValues calibrationValues = new CalibrationValues();
+        // calibrationValues.UpperArmLength = UpperArmLength;
+        // calibrationValues.LowerArmLength = LowerArmLength;
+        // calibrationValues.ShoulderDistFromNeckBase = ShoulderDistFromNeckBase;
+        // calibrationValues.NeckBaseOffsetFromHeadset = NeckBaseOffsetFromHeadset;
+        // calibrationValues.CableMotorOffsetfromShoulder = CableMotorOffsetfromShoulder;
+        // calibrationValues.CableWinchRadius = CableWinchRadius;
+        // calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
 
-        _sensorReadings = new SensorReadings(
-            new BraceSensorReader(_arduinoPort, _portMutex), 
-            TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
+        // _sensorReadings = new SensorReadings(
+        //     new BraceSensorReader(_arduinoPort, _portMutex), 
+        //     TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
 
-        _armModel = new ArmVectorModel(_sensorReadings,
-                calibrationValues, 
-                useDummyInputs: UseDummyInputs,
-                printIntermediateValues: PrintIntermediateValues,
-                useLeftControllerAsElbowTracker: UseLeftControllerAsElbowTracker,
-                ignoreImu:IgnoreImu,
-                FinalTestDisable:FinalTestDisable);
+        // _armModel = new ArmVectorModel(_sensorReadings,
+        //         calibrationValues, 
+        //         useDummyInputs: UseDummyInputs,
+        //         printIntermediateValues: PrintIntermediateValues,
+        //         useLeftControllerAsElbowTracker: UseLeftControllerAsElbowTracker,
+        //         ignoreImu:IgnoreImu,
+        //         FinalTestDisable:FinalTestDisable);
 
-        _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
+        // _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
 
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){

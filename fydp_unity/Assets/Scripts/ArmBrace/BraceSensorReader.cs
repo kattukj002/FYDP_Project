@@ -160,17 +160,17 @@ namespace FYDP {
                 while (!_stopThreadNeatly) {
                     if (_arduinoPort.IsOpen) {
                         
-                        if (_portMutex.WaitOne()) {
+                        if (_portMutex.WaitOne(6)) {
                             try{
                                 bytesRead = _arduinoPort.Read(buffer, 
                                                           0, 
                                                           readLength);
                                 _arduinoPort.DiscardInBuffer();
-                                byte[] bufcp = new byte[bytesRead];
-                                for(int i = 0; i < bytesRead; i++) {
-                                    bufcp[i] = buffer[i];
-                                }
-                                _portMutex.ReleaseMutex();                         
+                                _portMutex.ReleaseMutex();
+                                // byte[] bufcp = new byte[bytesRead];
+                                // for(int i = 0; i < bytesRead; i++) {
+                                //     bufcp[i] = buffer[i];
+                                // }
                                 // Debug.Log("RAW_SERIAL:" + BitConverter.ToString(bufcp));
                             } catch (TimeoutException) {
                                 _portMutex.ReleaseMutex();
