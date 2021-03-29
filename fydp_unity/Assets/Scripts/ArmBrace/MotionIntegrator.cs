@@ -28,6 +28,9 @@ namespace FYDP {
                 }
                 public void AddSample(Vector3 sample, out bool fullSampleBuffer) {
                     fullSampleBuffer = false;
+                    if (_index > maxSampleLength) { 
+                        throw new Exception("Index exceeds bounds. Current index: " + _index.ToString());
+                    }
                     Samples[_index] = sample;
                     _index++;
                     if (_index >= maxSampleLength) {
@@ -57,7 +60,7 @@ namespace FYDP {
                     Vector3 segmentIntegral;
 
                     clearedSamples = false;
-                    
+
                     switch(_index) {
                         case 5:
                             //Boole's rule
