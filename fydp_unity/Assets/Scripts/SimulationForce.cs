@@ -92,11 +92,11 @@ public class SimulationForce : MonoBehaviour
     private Mutex _portMutex = new Mutex();
     void Start()
     {
-        if(!FinalTestDisable) {
-            XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
-            controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
-            controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
-        }
+        // if(!FinalTestDisable) {
+        //     XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
+        //     controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
+        //     controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
+        // }
         
         if(!UseDummyInputs) {
 
@@ -150,7 +150,7 @@ public class SimulationForce : MonoBehaviour
         //         ignoreImu:IgnoreImu,
         //         FinalTestDisable:FinalTestDisable);
 
-        // _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
+        _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
 
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){
@@ -256,21 +256,23 @@ public class SimulationForce : MonoBehaviour
     void applyTorques(float elbowTorque, float cableMotorTorque)
     {
         // if(armCmdMutex.WaitOne(1)) {
-            bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
-                Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
-                Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
-                Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold);
+            // bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
+            //     Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
+            //     Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
+            //     Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold);
 
-            bool notMoving = Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold;
+            // bool notMoving = Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold;
             
-            if (RemoveHoldCommands || movementInSameDirAsTorque || notMoving) {
+            // if (RemoveHoldCommands || movementInSameDirAsTorque || notMoving) {
                 
-                elbowTorque = -elbowTorque;
-                _armCmd.elbow.SetTorqueMove(elbowTorque);
-            } else {
-                elbowTorque = -elbowTorque;
-                _armCmd.elbow.SetTorqueHold(elbowTorque);
-            }
+            //     elbowTorque = -elbowTorque;
+            //     _armCmd.elbow.SetTorqueMove(elbowTorque);
+            // } else {
+            //     elbowTorque = -elbowTorque;
+            //     _armCmd.elbow.SetTorqueHold(elbowTorque);
+            // }
+
+            _armCmd.elbow.SetTorqueHold(-elbowTorque);
             _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
             
             if (_portMutex.WaitOne(1)) {
