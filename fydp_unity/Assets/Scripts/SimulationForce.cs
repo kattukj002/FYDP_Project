@@ -150,7 +150,7 @@ public class SimulationForce : MonoBehaviour
         //         ignoreImu:IgnoreImu,
         //         FinalTestDisable:FinalTestDisable);
 
-        _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
+        // _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
 
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){
@@ -238,8 +238,13 @@ public class SimulationForce : MonoBehaviour
         // }
         float elbowTorque = 0;
         float cableMotorTorque = 0;
-        applyTorques(elbowTorque, cableMotorTorque);
-        _collisionForce.Set(0,0,0);
+        _armCmd.elbow.SetTorqueHold(-elbowTorque);
+        _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
+        
+        _armCmd.Send();
+        
+        //applyTorques(elbowTorque, cableMotorTorque);
+        //_collisionForce.Set(0,0,0);
     }
 
     void OnCollisionEnter(Collision collision){
@@ -272,7 +277,6 @@ public class SimulationForce : MonoBehaviour
             //     _armCmd.elbow.SetTorqueHold(elbowTorque);
             // }
 
-            _armCmd.elbow.SetTorqueHold(-elbowTorque);
             _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
             
             if (_portMutex.WaitOne(1)) {
