@@ -165,7 +165,7 @@ namespace FYDP {
                             for(int i = 0; i < bytesRead; i++) {
                                 bufcp[i] = buffer[i];
                             }                         
-                            Debug.Log("RAW_SERIAL:" + BitConverter.ToString(bufcp));
+                            // Debug.Log("RAW_SERIAL:" + BitConverter.ToString(bufcp));
                         } catch (TimeoutException) {
                             continue;
                         }
