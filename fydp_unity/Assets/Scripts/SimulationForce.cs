@@ -103,7 +103,9 @@ public class SimulationForce : MonoBehaviour
                 _arduinoPort.ReadBufferSize = SerialReadBufferSize;
                 _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
 
-                _arduinoPort.Open();
+                if(!_arduinoPort.IsOpen) {
+                    _arduinoPort.Open();
+                }
                 _started = true;
             }
 
@@ -257,7 +259,7 @@ public class SimulationForce : MonoBehaviour
                 _armCmd.elbow.SetTorqueHold(elbowTorque);
             }
             _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
-            _armCmd.Send();
+            //_armCmd.Send();
             newCmdReady = true;
         //     armCmdMutex.ReleaseMutex();
         // }
