@@ -98,9 +98,8 @@ public class SimulationForce : MonoBehaviour
             if(!_started) {
                 _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
                 //Will need to look into the correct values for this.
-                // _arduinoPort.WriteTimeout = SerialWriteTimeout;
-                // _arduinoPort.ReadTimeout = SerialReadTimeout;
-                _arduinoPort.InfiniteTimeout = true;
+                _arduinoPort.WriteTimeout = 10000;//SerialWriteTimeout;
+                _arduinoPort.ReadTimeout = 10000;//SerialReadTimeout;
                 _arduinoPort.ReadBufferSize = SerialReadBufferSize;
                 _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
 
@@ -108,6 +107,10 @@ public class SimulationForce : MonoBehaviour
                     _arduinoPort.Open();
                 }
                 _started = true;
+            }
+
+            if (_arduinoPort.BreakState){
+                throw new Exception("Broken port!");
             }
 
             _armCmd = new BraceCmd(
