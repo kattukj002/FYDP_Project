@@ -95,7 +95,7 @@ public class SimulationForce : MonoBehaviour
 
         if(!UseDummyInputs) {
 
-            if(!started) {
+            if(!_started) {
                 _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
                 _arduinoPort.Open();
 
