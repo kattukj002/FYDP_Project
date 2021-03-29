@@ -49,7 +49,7 @@ namespace FYDP {
                     }
                     
                 }
-                private void ClearSamples() {
+                public void ClearSamples() {
                     if (_index > 0) {
                         Samples[0] = Samples[maxSampleLength - 1];
                         _index = 1;    
@@ -112,9 +112,14 @@ namespace FYDP {
                     _firstIntegralBuffer.AddSample(_rateBuffer.EstimateIntegral(out bool clearedRateBuffer), out bool fullFirstIntegralBuffer);
                     Debug.Assert(clearedRateBuffer, "_rateBuffer was not cleared after full integral estimate.");
 
-                    if (fullFirstIntegralBuffer && _needSecondIntegral) {
-                        _secondIntegral += _firstIntegralBuffer.EstimateIntegral(out bool clearedFirstIntegralBuffer);
-                        Debug.Assert(clearedFirstIntegralBuffer, "_firstIntegralBuffer was not cleared after full integral estimate.");
+                    if (fullFirstIntegralBuffer) {
+                        if (_needSecondIntegral) {
+                            _secondIntegral += _firstIntegralBuffer.EstimateIntegral(out bool clearedFirstIntegralBuffer);
+                            Debug.Assert(clearedFirstIntegralBuffer, "_firstIntegralBuffer was not cleared after full integral estimate.");
+                        } else {
+                            _firstIntegralBuffer.ClearSamples();
+                        }
+                        
                     }
                 }                
             }
