@@ -56,6 +56,8 @@ namespace FYDP {
                 public Vector3 EstimateIntegral(out bool clearedSamples ) {
                     Vector3 segmentIntegral;
 
+                    clearedSamples = false;
+                    
                     switch(_index) {
                         case 5:
                             //Boole's rule
@@ -85,7 +87,6 @@ namespace FYDP {
                             throw new ArgumentException("Invalid integrand size", _index.ToString());
                             break;
                     }
-                    clearedSamples = false;
                     return segmentIntegral;
                 }
             }
