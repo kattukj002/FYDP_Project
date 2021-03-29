@@ -18,6 +18,10 @@ namespace FYDP {
                 _currDataTimeStamp = DateTime.MinValue;
                 _dataRelevanceLifetime = dataRelevanceLifetime;
             }
+
+            public void ReleaseResources() {
+                braceSensorReader.StopAsyncSensorReads();
+            }
             
 
             public bool TryInitSensors(float upperArmLength, Vector3 neckBaseOffsetFromHeadset, float shoulderDistFromNeckBase, float imuSensorMsgFreq) {

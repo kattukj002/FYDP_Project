@@ -28,9 +28,9 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private int ArduinoBaudRate = 115200;
     [SerializeField]
-    private int SerialWriteTimeout = 5;
+    private int SerialWriteTimeout = 10;
     [SerializeField]
-    private int SerialReadTimeout = 5;
+    private int SerialReadTimeout = 10;
     [SerializeField]
     private int SerialReadBufferSize = 24;
     [SerializeField]
@@ -143,18 +143,21 @@ public class SimulationForce : MonoBehaviour
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){
                 this.ReleaseResources();
+                _arduinoPort.Close();
             }
         };
     }
 
     ~SimulationForce(){
         ReleaseResources();
+        _arduinoPort.Close();
     }
     void OnApplicationQuit() {
         ReleaseResources();
+        _arduinoPort.Close();
     }
     void ReleaseResources() {
-        _arduinoPort.Close();
+        _sensorReadings.ReleaseResources();
     }
 
     void GetHeldObjectMass(XRBaseInteractable interactable){
@@ -190,6 +193,7 @@ public class SimulationForce : MonoBehaviour
         }
     
         if (_sensorReadings.Data.RightControllerSecondaryButtonPressed) {
+            ReleaseResources();
             Start();
             return;
         }
