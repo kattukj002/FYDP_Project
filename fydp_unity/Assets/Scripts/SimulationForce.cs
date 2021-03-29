@@ -255,7 +255,7 @@ public class SimulationForce : MonoBehaviour
             armCmdMutex.ReleaseMutex();
         }
     }
-    private Mutex armCmdMutex;
+    private Mutex armCmdMutex = new Mutex();
     private bool newCmdReady;
     private Vector3 _simForce;
     public float _cachedMass = 0f;
