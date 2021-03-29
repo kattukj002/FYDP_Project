@@ -97,14 +97,13 @@ public class SimulationForce : MonoBehaviour
 
             if(!_started) {
                 _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
-                _arduinoPort.Open();
-
                 //Will need to look into the correct values for this.
                 _arduinoPort.WriteTimeout = SerialWriteTimeout;
                 _arduinoPort.ReadTimeout = SerialReadTimeout;
                 _arduinoPort.ReadBufferSize = SerialReadBufferSize;
                 _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
 
+                _arduinoPort.Open();
                 _started = true;
             }
 
