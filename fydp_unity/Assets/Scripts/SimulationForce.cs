@@ -89,6 +89,7 @@ public class SimulationForce : MonoBehaviour
         }
     }
     private bool _started = false;
+    private Mutex _portMutex = new Mutex();
     void Start()
     {
         if(!FinalTestDisable) {
@@ -138,7 +139,7 @@ public class SimulationForce : MonoBehaviour
         calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
 
         _sensorReadings = new SensorReadings(
-            new BraceSensorReader(_arduinoPort), 
+            new BraceSensorReader(_arduinoPort, _portMutex), 
             TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
 
         _armModel = new ArmVectorModel(_sensorReadings,
@@ -271,7 +272,12 @@ public class SimulationForce : MonoBehaviour
                 _armCmd.elbow.SetTorqueHold(elbowTorque);
             }
             _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
-            _armCmd.Send();
+            
+            if (_portMutex.WaitOne(1)) {
+                _armCmd.Send();
+                _portMutex.ReleaseMutex();
+            }
+            
             newCmdReady = true;
         //     armCmdMutex.ReleaseMutex();
         // }

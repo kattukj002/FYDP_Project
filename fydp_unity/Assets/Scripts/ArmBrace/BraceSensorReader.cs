@@ -17,7 +17,8 @@ namespace FYDP {
                 public float ImuYAngularVelocity;
                 public float ImuZAngularVelocity; 
             }
-            public BraceSensorReader(SerialPort arduinoPort) {
+            private Mutex _portMutex; 
+            public BraceSensorReader(SerialPort arduinoPort, Mutex portMutex) {
                 _arduinoPort = arduinoPort;
                 // Hard-coded, expand flexibility if needed.
                 _frameHeader = new byte[2] {0xC0, 0xC0};
@@ -30,6 +31,8 @@ namespace FYDP {
                 }
                 _readThread = new Thread(this.AsyncSensorReads);
                 _imuThread = new Thread(this.UpdateImuEstimates);
+
+                _portMutex = portMutex;
                 
             }
             public void SetImuEstimator(ImuEstimator imuEstimator) {
@@ -157,18 +160,26 @@ namespace FYDP {
                 while (!_stopThreadNeatly) {
                     if (_arduinoPort.IsOpen) {
                         
-                        try{
-                            bytesRead = _arduinoPort.Read(buffer, 
+                        if (_portMutex.WaitOne()) {
+                            try{
+                                bytesRead = _arduinoPort.Read(buffer, 
                                                           0, 
                                                           readLength);
-                            byte[] bufcp = new byte[bytesRead];
-                            for(int i = 0; i < bytesRead; i++) {
-                                bufcp[i] = buffer[i];
-                            }                         
-                            // Debug.Log("RAW_SERIAL:" + BitConverter.ToString(bufcp));
-                        } catch (TimeoutException) {
+                                _arduinoPort.DiscardInBuffer();
+                                byte[] bufcp = new byte[bytesRead];
+                                for(int i = 0; i < bytesRead; i++) {
+                                    bufcp[i] = buffer[i];
+                                }
+                                _portMutex.ReleaseMutex();                         
+                                // Debug.Log("RAW_SERIAL:" + BitConverter.ToString(bufcp));
+                            } catch (TimeoutException) {
+                                _portMutex.ReleaseMutex();
+                                continue;
+                            }
+                        } else {
                             continue;
                         }
+                        
                         
                         for(int i = 0; i < bytesRead; i += 1) {
 
