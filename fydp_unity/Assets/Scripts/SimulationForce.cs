@@ -63,6 +63,8 @@ public class SimulationForce : MonoBehaviour
     private float RightControllerVelocityThreshold = 0.2f;
     [SerializeField]
     private float ImuSensorMsgFreq = 0.005f;
+    [SerializeField]
+    private bool FinalTestDisable = false;
 
     private class ArmMotionEstimators {
         public MotionEstimatorFloat ElbowDeg;
@@ -89,17 +91,19 @@ public class SimulationForce : MonoBehaviour
     private bool _started = false;
     void Start()
     {
-        XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
-        controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
-        controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
-
+        if(!FinalTestDisable) {
+            XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
+            controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
+            controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
+        }
+        
         if(!UseDummyInputs) {
 
             if(!_started) {
                 _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
                 //Will need to look into the correct values for this.
-                _arduinoPort.WriteTimeout = 10000;//SerialWriteTimeout;
-                _arduinoPort.ReadTimeout = 10000;//SerialReadTimeout;
+                _arduinoPort.WriteTimeout = SerialWriteTimeout;
+                _arduinoPort.ReadTimeout = SerialReadTimeout;
                 _arduinoPort.ReadBufferSize = SerialReadBufferSize;
                 _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
 
@@ -142,7 +146,8 @@ public class SimulationForce : MonoBehaviour
                 useDummyInputs: UseDummyInputs,
                 printIntermediateValues: PrintIntermediateValues,
                 useLeftControllerAsElbowTracker: UseLeftControllerAsElbowTracker,
-                ignoreImu:IgnoreImu);
+                ignoreImu:IgnoreImu,
+                FinalTestDisable:FinalTestDisable);
 
         _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
 
@@ -193,17 +198,17 @@ public class SimulationForce : MonoBehaviour
             count = 0;
             _armMotionEstimators.UpdateNewPosition(_sensorReadings.Data); 
         }
-        
-        if (!_sensorReadings.Data.MovingAvgsFilled() || !_armMotionEstimators.Filled()) {
-            return;
+        if (!FinalTestDisable) {
+            if (!_sensorReadings.Data.MovingAvgsFilled() || !_armMotionEstimators.Filled()) {
+                return;
+            }
         }
-    
+        
         if (_sensorReadings.Data.RightControllerSecondaryButtonPressed) {
             ReleaseResources();
             Start();
             return;
         }
-
         _simForce = Physics.gravity*_cachedMass + _collisionForce;
     
         if (_cachedMass > 0){
@@ -214,11 +219,13 @@ public class SimulationForce : MonoBehaviour
         _armModel.CalculateMotorTorques(_simForce, 
                                         out float elbowTorque, 
                                         out float cableMotorTorque);
-
-        if (display_values)
-        {
-            txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
-            //txt.text = System.DateTime.Now.ToString();
+        
+        if (!FinalTestDisable) {
+            if (display_values)
+            {
+                txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
+                //txt.text = System.DateTime.Now.ToString();
+            }
         }
 
         if(PrintIntermediateValues) {
@@ -228,7 +235,6 @@ public class SimulationForce : MonoBehaviour
             Logging.PrintQtyScalar("ELBOW_DEG_VELOCITY", _armMotionEstimators.ElbowDeg.EstimateVelocity(), "deg/s");
             Logging.PrintQtyScalar("CABLE_MOTOR_TORQUE", cableMotorTorque, "N-m");
         }
-
         applyTorques(elbowTorque, cableMotorTorque);
         _collisionForce.Set(0,0,0);
     }

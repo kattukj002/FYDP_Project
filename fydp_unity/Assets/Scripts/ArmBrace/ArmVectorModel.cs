@@ -12,7 +12,8 @@ namespace FYDP {
                 bool useDummyInputs=false,
                 bool printIntermediateValues=false,
                 bool useLeftControllerAsElbowTracker=false,
-                bool ignoreImu=false) {
+                bool ignoreImu=false,
+                bool FinalTestDisable=false) {
 
                 _upperArmLength = calibrationValues.UpperArmLength;
                 _lowerArmLength = calibrationValues.LowerArmLength;
@@ -27,7 +28,16 @@ namespace FYDP {
                
                _ignoreImu = ignoreImu;
                 _sensorReadings = sensorReadings;
-                _sensorReadings.TryInitSensors(_upperArmLength, _neckBaseOffsetFromHeadset, _shoulderDistFromNeckBase, calibrationValues.ImuSensorMsgFreq);
+
+                if (!FinalTestDisable) {
+                    if (!_sensorReadings.TryInitSensors(_upperArmLength, _neckBaseOffsetFromHeadset, _shoulderDistFromNeckBase, calibrationValues.ImuSensorMsgFreq)) {
+                        throw new Exception("Not all sensors initialized!");
+                    }
+                } else {
+                    _sensorReadings.TryInitSensors(_upperArmLength, _neckBaseOffsetFromHeadset, _shoulderDistFromNeckBase, calibrationValues.ImuSensorMsgFreq);
+                }
+                
+                
             }
 
             public void CalculateMotorTorques(Vector3 forceAtHand, 
