@@ -28,9 +28,9 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private int ArduinoBaudRate = 115200;
     [SerializeField]
-    private int SerialWriteTimeout = 1;
+    private int SerialWriteTimeout = 5;
     [SerializeField]
-    private int SerialReadTimeout = 1;
+    private int SerialReadTimeout = 5;
     [SerializeField]
     private int SerialReadBufferSize = 24;
     [SerializeField]
