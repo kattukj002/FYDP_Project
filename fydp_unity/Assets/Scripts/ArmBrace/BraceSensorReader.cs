@@ -78,9 +78,9 @@ namespace FYDP {
                 }
                 _stopThreadNeatly = false;
                 if(!_readThread.IsAlive){
-                    if(!_arduinoPort.IsOpen) {
-                        _arduinoPort.Open();
-                    }
+                    // if(!_arduinoPort.IsOpen) {
+                    //     _arduinoPort.Open();
+                    // }
                     _readThread.Start();   
                 }
                 if (!_imuThread.IsAlive) {
