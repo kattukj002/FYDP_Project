@@ -62,7 +62,7 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private float RightControllerVelocityThreshold = 0.2f;
     [SerializeField]
-    private float ImuSensorMsgFreq = 0.05f;
+    private float ImuSensorMsgFreq = 0.005f;
 
     private class ArmMotionEstimators {
         public MotionEstimatorFloat ElbowDeg;
