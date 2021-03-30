@@ -18,7 +18,7 @@ namespace FYDP {
                 public float ImuZAngularVelocity; 
             }
             private Mutex _portMutex; 
-            public BraceSensorReader(SerialPort arduinoPort) {//, Mutex portMutex) {
+            public BraceSensorReader(SerialPort arduinoPort, Mutex portMutex) {
                 _arduinoPort = arduinoPort;
                 // Hard-coded, expand flexibility if needed.
                 _frameHeader = new byte[2] {0xC0, 0xC0};
@@ -160,25 +160,25 @@ namespace FYDP {
                 while (!_stopThreadNeatly) {
                     if (_arduinoPort.IsOpen) {
                         
-                        // if (_portMutex.WaitOne(6)) {
+                        if (_portMutex.WaitOne(1)) {
                             try{
                                 bytesRead = _arduinoPort.Read(buffer, 
                                                           0, 
                                                           readLength);
                                 _arduinoPort.DiscardInBuffer();
-                                // _portMutex.ReleaseMutex();
+                                _portMutex.ReleaseMutex();
                                 // byte[] bufcp = new byte[bytesRead];
                                 // for(int i = 0; i < bytesRead; i++) {
                                 //     bufcp[i] = buffer[i];
                                 // }
                                 // Debug.Log("RAW_SERIAL:" + BitConverter.ToString(bufcp));
                             } catch (TimeoutException) {
-                                // _portMutex.ReleaseMutex();
+                                _portMutex.ReleaseMutex();
                                 continue;
                             }
-                        // } else {
-                        //     continue;
-                        // }
+                        } else {
+                            continue;
+                        }
                         
                         
                         for(int i = 0; i < bytesRead; i += 1) {

@@ -90,7 +90,7 @@ public class SimulationForce : MonoBehaviour
         }
     }
     private bool _started = false;
-    // private Mutex _portMutex = new Mutex();
+    private Mutex _portMutex = new Mutex();
 
     private Thread sendThread;
     private bool quitThread;
@@ -160,7 +160,7 @@ public class SimulationForce : MonoBehaviour
         calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
 
         _sensorReadings = new SensorReadings(
-            new BraceSensorReader(_arduinoPort),//, _portMutex), 
+            new BraceSensorReader(_arduinoPort, _portMutex), 
             TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
 
         _armModel = new ArmVectorModel(_sensorReadings,
@@ -298,7 +298,10 @@ public class SimulationForce : MonoBehaviour
 
         while(!quitThread) {
             if ((DateTime.Now - startTime) >= interval && newCmdReady) {
-                _armCmd.Send();
+                if (_portMutex.WaitOne(2)) {
+                    _armCmd.Send();
+                    _portMutex.ReleaseMutex();
+                }
                 newCmdReady = false;
                 startTime = DateTime.Now;
             }
