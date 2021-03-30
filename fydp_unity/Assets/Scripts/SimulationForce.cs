@@ -138,9 +138,9 @@ public class SimulationForce : MonoBehaviour
         calibrationValues.CableWinchRadius = CableWinchRadius;
         calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
 
-        // _sensorReadings = new SensorReadings(
-        //     new BraceSensorReader(_arduinoPort, _portMutex), 
-        //     TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
+        _sensorReadings = new SensorReadings(
+            new BraceSensorReader(_arduinoPort, _portMutex), 
+            TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
 
         // _armModel = new ArmVectorModel(_sensorReadings,
         //         calibrationValues, 
@@ -154,23 +154,23 @@ public class SimulationForce : MonoBehaviour
 
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){
-                // this.ReleaseResources();
+                this.ReleaseResources();
                 _arduinoPort.Close();
             }
         };
     }
 
     ~SimulationForce(){
-        // ReleaseResources();
+        ReleaseResources();
         _arduinoPort.Close();
     }
     void OnApplicationQuit() {
-        // ReleaseResources();
+        ReleaseResources();
         _arduinoPort.Close();
     }
-    // void ReleaseResources() {
-    //     _sensorReadings.ReleaseResources();
-    // }
+    void ReleaseResources() {
+        _sensorReadings.ReleaseResources();
+    }
 
     void GetHeldObjectMass(XRBaseInteractable interactable){
         List<Collider> colliderList = interactable.colliders;
@@ -255,7 +255,7 @@ public class SimulationForce : MonoBehaviour
 
     void applyTorques(float elbowTorque, float cableMotorTorque)
     {
-        // if(armCmdMutex.WaitOne(1)) {
+        if(armCmdMutex.WaitOne(1)) {
             // bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
             //     Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
             //     Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
@@ -272,7 +272,7 @@ public class SimulationForce : MonoBehaviour
             //     _armCmd.elbow.SetTorqueHold(elbowTorque);
             // }
 
-            // _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
+            _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
             
             // if (_portMutex.WaitOne(1)) {
             //     _armCmd.Send();
@@ -280,8 +280,8 @@ public class SimulationForce : MonoBehaviour
             // }
             
             // newCmdReady = true;
-        //     armCmdMutex.ReleaseMutex();
-        // }
+            armCmdMutex.ReleaseMutex();
+        }
     }
     void Update() {
 
