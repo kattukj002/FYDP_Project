@@ -11,7 +11,7 @@ using FYDP.Utils;
 using UnityEditor;
 using UnityEngine.UI;
 
-public class SimulationForce : MonoBehaviour
+public class SimulationForce_SKETCH : MonoBehaviour
 {
 
     public Text txt;
