@@ -195,7 +195,7 @@ public class SimulationForce : MonoBehaviour
     int period = 1;
     void FixedUpdate()
     {
-        if(_sensorReadings == null) {
+        if(_sensorReadings == null || _armMotionEstimators == null) {
             return;
         }
         if(!_sensorReadings.Update()) {
@@ -248,7 +248,7 @@ public class SimulationForce : MonoBehaviour
         }
         
         
-        //applyTorques(elbowTorque, cableMotorTorque);
+        applyTorques(elbowTorque, cableMotorTorque);
         _collisionForce.Set(0,0,0);
     }
 
@@ -263,8 +263,8 @@ public class SimulationForce : MonoBehaviour
         _collisionForce.Set(0,0,0);
     }
 
-    // void applyTorques(float elbowTorque, float cableMotorTorque)
-    // {
+    void applyTorques(float elbowTorque, float cableMotorTorque)
+    {
         // if(armCmdMutex.WaitOne(1)) {
             // bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
             //     Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
@@ -292,7 +292,7 @@ public class SimulationForce : MonoBehaviour
             // newCmdReady = true;
         //     armCmdMutex.ReleaseMutex();
         // }
-    // }
+    }
     void TxThreadFcn() {
 
         DateTime startTime = DateTime.Now;
@@ -320,7 +320,7 @@ public class SimulationForce : MonoBehaviour
     
     private BraceCmd _armCmd;
     private ArmVectorModel _armModel;
-    private ArmMotionEstimators _armMotionEstimators;
+    private ArmMotionEstimators _armMotionEstimators = null;
     private SerialPort _arduinoPort;
     private SensorReadings _sensorReadings = null;
 }
