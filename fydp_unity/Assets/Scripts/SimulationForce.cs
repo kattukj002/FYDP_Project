@@ -348,5 +348,5 @@ public class SimulationForce : MonoBehaviour
     // private ArmVectorModel _armModel;
     // private ArmMotionEstimators _armMotionEstimators;
     private SerialPort _arduinoPort;
-    // private SensorReadings _sensorReadings = null;
+    private SensorReadings _sensorReadings = null;
 }
