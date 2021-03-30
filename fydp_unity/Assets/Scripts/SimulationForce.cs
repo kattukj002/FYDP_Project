@@ -150,7 +150,7 @@ public class SimulationForce : MonoBehaviour
         //         ignoreImu:IgnoreImu,
         //         FinalTestDisable:FinalTestDisable);
 
-        _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
+        // _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
 
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){
@@ -210,7 +210,7 @@ public class SimulationForce : MonoBehaviour
         //     Start();
         //     return;
         // }
-        _simForce = Physics.gravity*_cachedMass + _collisionForce;
+        // _simForce = Physics.gravity*_cachedMass + _collisionForce;
     
         // if (_cachedMass > 0){
         //     _simForce += _armMotionEstimators.RightControllerPosition.EstimateAcceleration() * ArmMass * 
@@ -221,13 +221,13 @@ public class SimulationForce : MonoBehaviour
         //                                 out float elbowTorque, 
         //                                 out float cableMotorTorque);
         
-        if (!FinalTestDisable) {
-            if (display_values)
-            {
-                // txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
-                //txt.text = System.DateTime.Now.ToString();
-            }
-        }
+        // if (!FinalTestDisable) {
+        //     if (display_values)
+        //     {
+        //         txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
+        //         //txt.text = System.DateTime.Now.ToString();
+        //     }
+        // }
 
         // if(PrintIntermediateValues) {
         //     Logging.PrintQtyVector3("SIM_FORCE", _simForce, "N");
