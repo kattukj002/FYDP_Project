@@ -96,11 +96,11 @@ public class SimulationForce : MonoBehaviour
     private bool quitThread = false;
     void Start()
     {
-        // if(!FinalTestDisable) {
-        //     XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
-        //     controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
-        //     controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
-        // }
+        if(!FinalTestDisable) {
+            XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
+            controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
+            controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
+        }
         
         if(!UseDummyInputs) {
         
@@ -171,22 +171,8 @@ public class SimulationForce : MonoBehaviour
                 FinalTestDisable:FinalTestDisable);
 
         _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
-
-        // EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
-        //     if(state == PlayModeStateChange.ExitingPlayMode){
-        //         this.ReleaseResources();
-        //         if(_arduinoPort != null && _arduinoPort.IsOpen) {
-        //             _arduinoPort.DiscardInBuffer();
-        //             _arduinoPort.DiscardOutBuffer();
-        //             _arduinoPort.Close();
-        //         }
-        //     }
-        // };
     }
 
-    // void OnApplicationQuit() {
-    //     EndThreads();
-    // }
     void EndThreads() {
         quitThread = true;
         if (sendThread.IsAlive) {
@@ -195,26 +181,14 @@ public class SimulationForce : MonoBehaviour
         _sensorReadings.ReleaseResources();
     }
 
-    // ~SimulationForce(){
-    //     ReleaseResources();
-    //     if(_arduinoPort != null && _arduinoPort.IsOpen) {
-    //         _arduinoPort.DiscardInBuffer();
-    //         _arduinoPort.DiscardOutBuffer();
-    //         _arduinoPort.Close();
-    //     }
-    // }
-    // void ReleaseResources() {
-    //     _sensorReadings.ReleaseResources();
-    // }
+    void GetHeldObjectMass(XRBaseInteractable interactable){
+        List<Collider> colliderList = interactable.colliders;
+        _cachedMass = colliderList[0].attachedRigidbody.mass;
+    }
 
-    // void GetHeldObjectMass(XRBaseInteractable interactable){
-    //     List<Collider> colliderList = interactable.colliders;
-    //     _cachedMass = colliderList[0].attachedRigidbody.mass;
-    // }
-
-    // void ZeroHeldObjectMass(XRBaseInteractable interactable) {
-    //     _cachedMass = 0;
-    // }
+    void ZeroHeldObjectMass(XRBaseInteractable interactable) {
+        _cachedMass = 0;
+    }
 
     // int count = 0;
     // int period = 1;
