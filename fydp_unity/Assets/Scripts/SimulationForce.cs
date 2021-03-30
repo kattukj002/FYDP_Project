@@ -98,7 +98,7 @@ public class SimulationForce : MonoBehaviour
         //     controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
         // }
         
-        if(!UseDummyInputs) {
+        // if(!UseDummyInputs) {
 
             // if(!_started) {
                 _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
@@ -129,7 +129,7 @@ public class SimulationForce : MonoBehaviour
                     torqueRatingNm:1.89f, torqueCmdFullScale:MotorPowerFraction * 89, gearRatio:ShoulderGearRatio, 
                     stictionEncodedTorque:8, isCableMotor:true)
                 );
-        }
+        // }
 
         // CalibrationValues calibrationValues = new CalibrationValues();
         // calibrationValues.UpperArmLength = UpperArmLength;
@@ -197,8 +197,8 @@ public class SimulationForce : MonoBehaviour
 
     // int count = 0;
     // int period = 1;
-    void FixedUpdate()
-    {
+    // void FixedUpdate()
+    // {
         // if(_sensorReadings == null) {
         //     return;
         // }
@@ -254,7 +254,7 @@ public class SimulationForce : MonoBehaviour
         
         //applyTorques(elbowTorque, cableMotorTorque);
         // _collisionForce.Set(0,0,0);
-    }
+    // }
 
     // void OnCollisionEnter(Collision collision){
         //Assume all collisions happen over one Time.fixedDeltaTime unit.
