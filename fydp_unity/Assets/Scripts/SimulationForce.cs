@@ -162,11 +162,11 @@ public class SimulationForce : MonoBehaviour
 
     ~SimulationForce(){
     //     ReleaseResources();
-    //     _arduinoPort.Close();
+        _arduinoPort.Close();
     }
     void OnApplicationQuit() {
     //     ReleaseResources();
-    //     _arduinoPort.Close();
+        _arduinoPort.Close();
     }
     // void ReleaseResources() {
     //     _sensorReadings.ReleaseResources();
