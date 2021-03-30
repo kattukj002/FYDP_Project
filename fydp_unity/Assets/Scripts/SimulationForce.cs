@@ -197,22 +197,22 @@ public class SimulationForce : MonoBehaviour
         if(_sensorReadings == null) {
             return;
         }
-        // if(!_sensorReadings.Update()) {
-        //     Debug.Log("Could not get updated sensor readings.");
-        //     _armMotionEstimators.EstimateUnobtainableNewPosition();
-        // } else {
-        //     count += 1;
-        //     if (count % period != 0) {
-        //         return;
-        //     }
-        //     count = 0;
-        //     _armMotionEstimators.UpdateNewPosition(_sensorReadings.Data); 
-        // }
-        // if (!FinalTestDisable) {
-        //     if (!_sensorReadings.Data.MovingAvgsFilled() || !_armMotionEstimators.Filled()) {
-        //         return;
-        //     }
-        // }
+        if(!_sensorReadings.Update()) {
+            Debug.Log("Could not get updated sensor readings.");
+            _armMotionEstimators.EstimateUnobtainableNewPosition();
+        } else {
+            count += 1;
+            if (count % period != 0) {
+                return;
+            }
+            count = 0;
+            _armMotionEstimators.UpdateNewPosition(_sensorReadings.Data); 
+        }
+        if (!FinalTestDisable) {
+            if (!_sensorReadings.Data.MovingAvgsFilled() || !_armMotionEstimators.Filled()) {
+                return;
+            }
+        }
         
         // if (_sensorReadings.Data.RightControllerSecondaryButtonPressed) {
         //     ReleaseResources();
