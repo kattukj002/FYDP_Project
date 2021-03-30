@@ -37,14 +37,6 @@ public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
         
         armCmd.elbow.SetTorqueMove(1f);
         armCmd.shoulderDown.SetTorqueMove(2f);
-
-        EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
-            if(state == PlayModeStateChange.ExitingPlayMode){
-                if (arduino != null && arduino.IsOpen) {
-                    arduino.Close();
-                }       
-            }
-        };
     }
 
     //Changed to thread b/c of Oculus libraries stopping program with exceptions otherwise.
