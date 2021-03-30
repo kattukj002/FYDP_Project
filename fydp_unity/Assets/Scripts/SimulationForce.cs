@@ -66,28 +66,28 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private bool FinalTestDisable = false;
 
-    // private class ArmMotionEstimators {
-    //     public MotionEstimatorFloat ElbowDeg;
-    //     public MotionEstimatorVector3 RightControllerPosition;
+    private class ArmMotionEstimators {
+        public MotionEstimatorFloat ElbowDeg;
+        public MotionEstimatorVector3 RightControllerPosition;
 
-    //     public ArmMotionEstimators(float timestepSeconds) {
-    //         ElbowDeg = new MotionEstimatorFloat(timestepSeconds);
-    //         RightControllerPosition = new MotionEstimatorVector3(timestepSeconds);
-    //     }
-    //     public void EstimateUnobtainableNewPosition() {
-    //         ElbowDeg.EstimateUnobtainableNewPosition();
-    //         RightControllerPosition.EstimateUnobtainableNewPosition();
-    //     }
+        public ArmMotionEstimators(float timestepSeconds) {
+            ElbowDeg = new MotionEstimatorFloat(timestepSeconds);
+            RightControllerPosition = new MotionEstimatorVector3(timestepSeconds);
+        }
+        public void EstimateUnobtainableNewPosition() {
+            ElbowDeg.EstimateUnobtainableNewPosition();
+            RightControllerPosition.EstimateUnobtainableNewPosition();
+        }
 
-    //     public void UpdateNewPosition(SensorData sensorData) {
-    //         ElbowDeg.UpdateNewPosition(sensorData.ElbowDeg);
-    //         RightControllerPosition.UpdateNewPosition(sensorData.RightControllerPosition);
-    //     }
+        public void UpdateNewPosition(SensorData sensorData) {
+            ElbowDeg.UpdateNewPosition(sensorData.ElbowDeg);
+            RightControllerPosition.UpdateNewPosition(sensorData.RightControllerPosition);
+        }
 
-    //     public bool Filled(){
-    //         return ElbowDeg.filled && RightControllerPosition.filled;
-    //     }
-    // }
+        public bool Filled(){
+            return ElbowDeg.filled && RightControllerPosition.filled;
+        }
+    }
     // private bool _started = false;
     // private Mutex _portMutex = new Mutex();
     void Start()
