@@ -89,7 +89,7 @@ public class SimulationForce : MonoBehaviour
     //         return ElbowDeg.filled && RightControllerPosition.filled;
     //     }
     // }
-    // private bool _started = false;
+    private bool _started = false;
     // private Mutex _portMutex = new Mutex();
 
     private Thread sendThread;
@@ -102,9 +102,9 @@ public class SimulationForce : MonoBehaviour
         //     controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
         // }
         
-        // if(!UseDummyInputs) {
+        if(!UseDummyInputs) {
         
-            // if(!_started) {
+            if(!_started) {
                 _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
                 //Will need to look into the correct values for this.
                 // _arduinoPort.WriteTimeout = SerialWriteTimeout;
@@ -118,12 +118,12 @@ public class SimulationForce : MonoBehaviour
                 if (!_arduinoPort.IsOpen) {
                     throw new Exception("Unable to open port");
                 }
-            //     _started = true;
-            // }
+                _started = true;
+            }
 
-            // if (_arduinoPort.BreakState){
-            //     throw new Exception("Broken port!");
-            // }
+            if (_arduinoPort.BreakState){
+                throw new Exception("Broken port!");
+            }
 
             _armCmd = new BraceCmd(
                 _arduinoPort, 
@@ -134,7 +134,7 @@ public class SimulationForce : MonoBehaviour
                     torqueRatingNm:1.89f, torqueCmdFullScale:MotorPowerFraction * 89, gearRatio:ShoulderGearRatio, 
                     stictionEncodedTorque:8, isCableMotor:true)
                 );
-        // }
+        }
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){
                 this.EndThreads();
