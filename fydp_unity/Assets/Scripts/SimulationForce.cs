@@ -305,10 +305,8 @@ public class SimulationForce : MonoBehaviour
             if ((DateTime.Now - startTime) >= interval && newCmdReady) {
                 if (_portMutex.WaitOne(2)) {
                     var rand = new System.Random();
-
                     if (DateTime.Now - myTime > dur) {
-                        float myTorque = (float)Math.Round(rand.NextDouble(), MidpointRounding.AwayFromZero) * 5;
-                        _armCmd.elbow.SetTorqueMove(myTorque);
+                        _armCmd.elbow.SetTorqueMove((float)rand.NextDouble()*5);
                         myTime = DateTime.Now;
                     }
                     _armCmd.Send();

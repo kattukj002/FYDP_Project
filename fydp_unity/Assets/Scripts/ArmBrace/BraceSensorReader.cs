@@ -211,6 +211,10 @@ namespace FYDP {
                         if (currFrameMsgByte >= _frameMsgLength) {
                             buildingIncompleteFrame = false;
                             
+                            if (msgBytes[0] == 0xFF) {
+                                throw new Exception("FUBAR!");
+                                continue;
+                            }
                             ProcessInputByteArray(
                                 msgBytes, out _sensorDataBuffers[writeBufferIndex]);
 
