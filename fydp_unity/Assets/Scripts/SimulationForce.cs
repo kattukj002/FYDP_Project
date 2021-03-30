@@ -289,7 +289,7 @@ public class SimulationForce : MonoBehaviour
             //     _portMutex.ReleaseMutex();
             // }
             
-            // newCmdReady = true;
+            newCmdReady = true;
             armCmdMutex.ReleaseMutex();
         }
     }
@@ -299,9 +299,11 @@ public class SimulationForce : MonoBehaviour
         TimeSpan interval = TimeSpan.FromMilliseconds(10);
 
         while(!quitThread) {
-            if ((DateTime.Now - startTime) >= interval && armCmdMutex.WaitOne(5)) {
-                _armCmd.Send();
-                armCmdMutex.ReleaseMutex();
+            if ((DateTime.Now - startTime) >= interval && newCmdReady) {
+                if (armCmdMutex.WaitOne(5)) {
+                    _armCmd.Send();
+                    armCmdMutex.ReleaseMutex();
+                }
                 startTime = DateTime.Now;
             }
         }
@@ -312,7 +314,7 @@ public class SimulationForce : MonoBehaviour
         // }
     }
     private Mutex armCmdMutex = new Mutex();
-    private bool newCmdReady;
+    private bool newCmdReady = false;
     private Vector3 _simForce;
     public float _cachedMass = 0f;
     private Vector3 _collisionForce = new Vector3(0,0,0);

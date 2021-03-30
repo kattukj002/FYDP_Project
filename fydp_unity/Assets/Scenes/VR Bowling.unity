@@ -1652,12 +1652,12 @@ MonoBehaviour:
   display_values: 1
   ArmMass: 2
   UseDummyInputs: 0
-  PrintIntermediateValues: 1
+  PrintIntermediateValues: 0
   ArduinoPortName: COM4
   ArduinoBaudRate: 115200
   SerialWriteTimeout: 1
   SerialReadTimeout: 1
-  SerialReadBufferSize: 16
+  SerialReadBufferSize: 24
   SerialWriteBufferSize: 16
   sensorDataRelevanceLifetimeMs: 500
   UpperArmLength: 0.3
@@ -1721,8 +1721,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -298, y: -40}
-  m_SizeDelta: {x: 262.5176, y: 95.71647}
+  m_AnchoredPosition: {x: 16.2, y: -41.1}
+  m_SizeDelta: {x: 890.8644, y: 97.92899}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1242170835
 MonoBehaviour:
