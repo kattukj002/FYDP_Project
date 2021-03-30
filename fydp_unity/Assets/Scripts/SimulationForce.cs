@@ -285,13 +285,13 @@ public class SimulationForce : MonoBehaviour
     }
     void Update() {
 
-        float elbowTorque = 0.2;
-        float cableMotorTorque = 0.2;
+        float elbowTorque = 0.2f;
+        float cableMotorTorque = 0.2f;
         _armCmd.elbow.SetTorqueHold(-elbowTorque);
         _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
         
         _armCmd.Send();
-        
+
         // if(newCmdReady && armCmdMutex.WaitOne(1)) {
         //     // _armCmd.Send();
         //     newCmdReady = false;
