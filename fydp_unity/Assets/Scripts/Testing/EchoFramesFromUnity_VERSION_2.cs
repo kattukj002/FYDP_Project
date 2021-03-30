@@ -34,11 +34,6 @@ public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
         armCmd.shoulderDown.SetTorqueMove(2f);
     }
 
-    ~EchoFramesFromUnity_VERSION_2() {
-        if (arduino.IsOpen) {
-            arduino.Close();
-        }
-    }
     //Changed to thread b/c of Oculus libraries stopping program with exceptions otherwise.
     void Update() {
         armCmd.Send();

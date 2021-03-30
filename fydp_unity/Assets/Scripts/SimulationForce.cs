@@ -157,26 +157,26 @@ public class SimulationForce : MonoBehaviour
 
         // _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
 
-        EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
-            if(state == PlayModeStateChange.ExitingPlayMode){
-                // this.ReleaseResources();
-                if(_arduinoPort != null && _arduinoPort.IsOpen) {
-                    // _arduinoPort.DiscardInBuffer();
-                    // _arduinoPort.DiscardOutBuffer();
-                    _arduinoPort.Close();
-                }
-            }
-        };
+        // EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
+        //     if(state == PlayModeStateChange.ExitingPlayMode){
+        //         this.ReleaseResources();
+        //         if(_arduinoPort != null && _arduinoPort.IsOpen) {
+        //             _arduinoPort.DiscardInBuffer();
+        //             _arduinoPort.DiscardOutBuffer();
+        //             _arduinoPort.Close();
+        //         }
+        //     }
+        // };
     }
 
-    ~SimulationForce(){
+    // ~SimulationForce(){
     //     ReleaseResources();
-        if(_arduinoPort != null && _arduinoPort.IsOpen) {
-            // _arduinoPort.DiscardInBuffer();
-            // _arduinoPort.DiscardOutBuffer();
-            _arduinoPort.Close();
-        }
-    }
+    //     if(_arduinoPort != null && _arduinoPort.IsOpen) {
+    //         _arduinoPort.DiscardInBuffer();
+    //         _arduinoPort.DiscardOutBuffer();
+    //         _arduinoPort.Close();
+    //     }
+    // }
     // void ReleaseResources() {
     //     _sensorReadings.ReleaseResources();
     // }
