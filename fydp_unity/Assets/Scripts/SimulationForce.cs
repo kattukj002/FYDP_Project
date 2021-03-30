@@ -266,24 +266,23 @@ public class SimulationForce : MonoBehaviour
     void applyTorques(float elbowTorque, float cableMotorTorque)
     {
         if (!newCmdReady) {
-            // bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
-            //     Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
-            //     Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
-            //     Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold);
+            bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
+                Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
+                Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
+                Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold);
 
-            // bool notMoving = Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold;
+            bool notMoving = Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold;
             
-            // if (RemoveHoldCommands || movementInSameDirAsTorque || notMoving) {
+            if (RemoveHoldCommands || movementInSameDirAsTorque || notMoving) {
                 
-            //     elbowTorque = -elbowTorque;
-            //     _armCmd.elbow.SetTorqueMove(elbowTorque);
-            // } else {
-            //     elbowTorque = -elbowTorque;
-            //     _armCmd.elbow.SetTorqueHold(elbowTorque);
-            // }
+                elbowTorque = -elbowTorque;
+                _armCmd.elbow.SetTorqueMove(elbowTorque);
+            } else {
+                elbowTorque = -elbowTorque;
+                _armCmd.elbow.SetTorqueHold(elbowTorque);
+            }
 
-            //_armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
-            _armCmd.shoulderDown.SetTorqueMove(10);
+            _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
             
             newCmdReady = true;
         }
@@ -302,7 +301,7 @@ public class SimulationForce : MonoBehaviour
         }
     }
     private Mutex armCmdMutex = new Mutex();
-    private bool newCmdReady;
+    private bool newCmdReady = false;
     private Vector3 _simForce;
     public float _cachedMass = 0f;
     private Vector3 _collisionForce = new Vector3(0,0,0);
