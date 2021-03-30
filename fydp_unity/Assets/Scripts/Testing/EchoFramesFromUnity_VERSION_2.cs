@@ -29,13 +29,14 @@ public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
                     torqueRatingNm:1.89f, torqueCmdFullScale:89, gearRatio:5, 
                     stictionEncodedTorque:8)
                 );
-        
-        armCmd.elbow.SetTorqueMove(1f);
-        armCmd.shoulderDown.SetTorqueMove(2f);
     }
 
     //Changed to thread b/c of Oculus libraries stopping program with exceptions otherwise.
     void Update() {
+        float elbowTorque = 0.2f;
+        float cableMotorTorque = 0.2f;
+        armCmd.elbow.SetTorqueMove(elbowTorque);
+        armCmd.shoulderDown.SetTorqueMove(cableMotorTorque);
         armCmd.Send();
     }
 }

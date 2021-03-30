@@ -113,9 +113,9 @@ public class SimulationForce : MonoBehaviour
                     // _arduinoPort.DiscardInBuffer();
                     // _arduinoPort.DiscardOutBuffer();
                 }
-                DateTime startime =  DateTime.Now;
-                TimeSpan dur = TimeSpan.FromMilliseconds(3000);
-                while (DateTime.Now - startime < dur) {}
+                // DateTime startime =  DateTime.Now;
+                // TimeSpan dur = TimeSpan.FromMilliseconds(3000);
+                // while (DateTime.Now - startime < dur) {}
             //     _started = true;
             // }
 
