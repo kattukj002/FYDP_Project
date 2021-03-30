@@ -265,43 +265,54 @@ public class SimulationForce : MonoBehaviour
 
     void applyTorques(float elbowTorque, float cableMotorTorque)
     {
-        if (!newCmdReady) {
-                // bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
-                //     Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
-                //     Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
-                //     Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold);
+        if(armCmdMutex.WaitOne(1)) {
+            // bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
+            //     Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
+            //     Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
+            //     Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold);
 
-                // bool notMoving = Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold;
+            // bool notMoving = Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold;
+            
+            // if (RemoveHoldCommands || movementInSameDirAsTorque || notMoving) {
                 
-                // if (RemoveHoldCommands || movementInSameDirAsTorque || notMoving) {
-                    
-                //     elbowTorque = -elbowTorque;
-                    _armCmd.elbow.SetTorqueMove(elbowTorque);
-                // } else {
-                //     elbowTorque = -elbowTorque;
-                //     _armCmd.elbow.SetTorqueHold(elbowTorque);
-                // }
+            //     elbowTorque = -elbowTorque;
+            //     _armCmd.elbow.SetTorqueMove(elbowTorque);
+            // } else {
+            //     elbowTorque = -elbowTorque;
+            //     _armCmd.elbow.SetTorqueHold(elbowTorque);
+            // }
 
-                _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
-                
-                newCmdReady = true;
+            // _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
+            
+            // if (_portMutex.WaitOne(1)) {
+            //     _armCmd.Send();
+            //     _portMutex.ReleaseMutex();
+            // }
+            
+            // newCmdReady = true;
+            armCmdMutex.ReleaseMutex();
         }
     }
     void TxThreadFcn() {
 
         DateTime startTime = DateTime.Now;
-        TimeSpan interval = TimeSpan.FromMilliseconds(10);
+        TimeSpan interval = TimeSpan.FromMilliseconds(1000);
 
         while(!quitThread) {
-            if ((DateTime.Now - startTime) >= interval && newCmdReady) {
+            if ((DateTime.Now - startTime) >= interval) {
+                Debug.Log("SENDING!!!!");
                 _armCmd.Send();
-                newCmdReady = false;
                 startTime = DateTime.Now;
             }
         }
+        // if(newCmdReady && armCmdMutex.WaitOne(1)) {
+        //     // _armCmd.Send();
+        //     newCmdReady = false;
+        //     armCmdMutex.ReleaseMutex();
+        // }
     }
-    // private Mutex armCmdMutex = new Mutex();
-    private bool newCmdReady = false;
+    private Mutex armCmdMutex = new Mutex();
+    private bool newCmdReady;
     private Vector3 _simForce;
     public float _cachedMass = 0f;
     private Vector3 _collisionForce = new Vector3(0,0,0);
