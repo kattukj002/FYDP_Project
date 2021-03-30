@@ -111,11 +111,9 @@ public class SimulationForce : MonoBehaviour
                 // _arduinoPort.ReadBufferSize = SerialReadBufferSize;
                 // _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
                 
-                if(!_arduinoPort.IsOpen) {
-                    _arduinoPort.Open();
+                _arduinoPort.Open();
                     // _arduinoPort.DiscardInBuffer();
                     // _arduinoPort.DiscardOutBuffer();
-                }
                 if (!_arduinoPort.IsOpen) {
                     throw new Exception("Unable to open port");
                 }
@@ -144,6 +142,11 @@ public class SimulationForce : MonoBehaviour
                 this.EndThreads();
             }
         };
+
+        float elbowTorque = 0.2f;
+        float cableMotorTorque = 0.2f;
+        _armCmd.elbow.SetTorqueMove(-elbowTorque);
+        _armCmd.shoulderDown.SetTorqueMove(-cableMotoroveTorque);
 
         sendThread = new Thread(this.TxThreadFcn);
         sendThread.Start();
@@ -317,11 +320,6 @@ public class SimulationForce : MonoBehaviour
         // }
     // }
     void TxThreadFcn() {
-
-        float elbowTorque = 0.2f;
-        float cableMotorTorque = 0.2f;
-        _armCmd.elbow.SetTorqueHold(-elbowTorque);
-        _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
 
         DateTime startTime = DateTime.Now;
         TimeSpan interval = TimeSpan.FromMilliseconds(1000);
