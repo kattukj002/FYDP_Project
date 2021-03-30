@@ -7,7 +7,7 @@ using FYDP.ArmBrace;
 using UnityEditor;
 using System;
 
-public class EchoFramesFromUnity : MonoBehaviour
+public class EchoFramesFromUnityV2 : MonoBehaviour
 {
     public string PortName = "COM4";
     public int BaudRate = 115200; 
