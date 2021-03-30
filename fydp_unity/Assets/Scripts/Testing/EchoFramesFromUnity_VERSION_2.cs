@@ -19,14 +19,14 @@ public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
     private bool quitThread = false;
 
     void Start() {
-        _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
+        arduino = new SerialPort(ArduinoPortName, ArduinoBaudRate);
         if (!arduino.IsOpen){
             arduino.Open();
         }
         
         DateTime startime =  DateTime.Now;
         TimeSpan dur = TimeSpan.FromMilliseconds(3000);
-
+        while (DateTime.Now - startime < dur) {}
         armCmd = new BraceCmd(
                 arduino, 
                 elbow_:new MotorCmdFormat(
