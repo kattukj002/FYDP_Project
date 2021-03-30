@@ -298,16 +298,16 @@ public class SimulationForce : MonoBehaviour
         //     armCmdMutex.ReleaseMutex();
         // }
     }
-    // private Mutex armCmdMutex = new Mutex();
+    private Mutex armCmdMutex = new Mutex();
     private bool newCmdReady;
     private Vector3 _simForce;
     public float _cachedMass = 0f;
-    // private Vector3 _collisionForce = new Vector3(0,0,0);
+    private Vector3 _collisionForce = new Vector3(0,0,0);
     
     
     private BraceCmd _armCmd;
-    // private ArmVectorModel _armModel;
-    // private ArmMotionEstimators _armMotionEstimators;
+    private ArmVectorModel _armModel;
+    private ArmMotionEstimators _armMotionEstimators;
     private SerialPort _arduinoPort;
     private SensorReadings _sensorReadings = null;
 }
