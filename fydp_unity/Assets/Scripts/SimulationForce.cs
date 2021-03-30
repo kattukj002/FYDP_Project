@@ -296,7 +296,7 @@ public class SimulationForce : MonoBehaviour
     void TxThreadFcn() {
 
         DateTime startTime = DateTime.Now;
-        TimeSpan interval = TimeSpan.FromMilliseconds(1000);
+        TimeSpan interval = TimeSpan.FromMilliseconds(10);
 
         while(!quitThread) {
             if ((DateTime.Now - startTime) >= interval && armCmdMutex.WaitOne(100)) {
