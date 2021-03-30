@@ -93,7 +93,12 @@ public class SimulationForce : MonoBehaviour
     // private Mutex _portMutex = new Mutex();
 
     private Thread sendThread;
-    private bool quitThread;
+    private bool quitThread;   
+    
+    IEnumerator Wait(float seconds)
+    {
+    yield return new WaitForSeconds(seconds);
+    }
     void Start()
     {
         quitThread = false;
@@ -103,6 +108,20 @@ public class SimulationForce : MonoBehaviour
             controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
         }
         
+        bool keepWaiting = true;
+        while(keepWaiting) {
+            StartCoroutine(Wait(1.0f));
+            bool gotRightController = TryGetInputDevice(VRUtils.DeviceId.RightController, out InputDevice rightController);
+            
+            if (gotRightController) {
+                if (rightController.TryGetFeatureValue(CommonUsages.secondaryButton, out bool rightControllerSecondaryButtonPressed)) {
+                    if (rightControllerSecondaryButtonPressed) {
+                        keepWaiting = false;
+                    }
+                }
+            }
+        }
+
         if(!UseDummyInputs) {
         
             if(!_started) {
@@ -215,11 +234,11 @@ public class SimulationForce : MonoBehaviour
             }
         }
         
-        if (_sensorReadings.Data.RightControllerSecondaryButtonPressed) {
-            EndThreads();
-            Start();
-            return;
-        }
+        // if (_sensorReadings.Data.RightControllerSecondaryButtonPressed) {
+        //     EndThreads();
+        //     Start();
+        //     return;
+        // }
         _simForce = Physics.gravity*_cachedMass + _collisionForce;
     
         if (_cachedMass > 0){
