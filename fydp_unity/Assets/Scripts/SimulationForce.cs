@@ -224,7 +224,7 @@ public class SimulationForce : MonoBehaviour
         if (!FinalTestDisable) {
             if (display_values)
             {
-                txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
+                // txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
                 //txt.text = System.DateTime.Now.ToString();
             }
         }
