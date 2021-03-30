@@ -236,12 +236,7 @@ public class SimulationForce : MonoBehaviour
         //     Logging.PrintQtyScalar("ELBOW_DEG_VELOCITY", _armMotionEstimators.ElbowDeg.EstimateVelocity(), "deg/s");
         //     Logging.PrintQtyScalar("CABLE_MOTOR_TORQUE", cableMotorTorque, "N-m");
         // }
-        float elbowTorque = 0;
-        float cableMotorTorque = 0;
-        _armCmd.elbow.SetTorqueHold(-elbowTorque);
-        _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
         
-        _armCmd.Send();
         
         //applyTorques(elbowTorque, cableMotorTorque);
         //_collisionForce.Set(0,0,0);
@@ -289,6 +284,14 @@ public class SimulationForce : MonoBehaviour
         // }
     }
     void Update() {
+
+        float elbowTorque = 0.2;
+        float cableMotorTorque = 0.2;
+        _armCmd.elbow.SetTorqueHold(-elbowTorque);
+        _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
+        
+        _armCmd.Send();
+        
         // if(newCmdReady && armCmdMutex.WaitOne(1)) {
         //     // _armCmd.Send();
         //     newCmdReady = false;
