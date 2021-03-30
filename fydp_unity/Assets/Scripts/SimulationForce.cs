@@ -286,7 +286,7 @@ public class SimulationForce : MonoBehaviour
             // _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
             var rand = new System.Random();
             if (DateTime.Now - myTime > dur) {
-                _armCmd.elbow.SetTorqueMove((float)rand.NextDouble());
+                _armCmd.elbow.SetTorqueMove((float)rand.NextDouble()*5);
                 myTime = DateTime.Now;
             }
             
