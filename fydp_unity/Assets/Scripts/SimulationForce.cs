@@ -264,7 +264,7 @@ public class SimulationForce : MonoBehaviour
     }
 
     DateTime myTime = DateTime.Now;
-    TimeSpan dur = new TimeSpan.FromMilliseconds(1000);
+    TimeSpan dur = TimeSpan.FromMilliseconds(1000);
     void applyTorques(float elbowTorque, float cableMotorTorque)
     {
         // if (!newCmdReady) {
@@ -284,7 +284,7 @@ public class SimulationForce : MonoBehaviour
             //     _armCmd.elbow.SetTorqueHold(elbowTorque);
             // }
             // _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
-            var rand = new Random();
+            var rand = new System.Random();
             if (DateTime.Now - myTime > dur) {
                 _armCmd.elbow.SetTorqueMove((float)rand.NextDouble());
                 myTime = DateTime.Now;
