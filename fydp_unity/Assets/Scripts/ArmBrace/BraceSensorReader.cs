@@ -32,7 +32,7 @@ namespace FYDP {
                 _readThread = new Thread(this.AsyncSensorReads);
                 _imuThread = new Thread(this.UpdateImuEstimates);
 
-                // _portMutex = portMutex;
+                _portMutex = portMutex;
                 
             }
             public void SetImuEstimator(ImuEstimator imuEstimator) {
