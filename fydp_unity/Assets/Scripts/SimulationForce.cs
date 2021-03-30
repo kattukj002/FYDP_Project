@@ -177,14 +177,6 @@ public class SimulationForce : MonoBehaviour
             _arduinoPort.Close();
         }
     }
-    void OnApplicationQuit() {
-    //     ReleaseResources();
-        if(_arduinoPort != null && _arduinoPort.IsOpen) {
-            // _arduinoPort.DiscardInBuffer();
-            // _arduinoPort.DiscardOutBuffer();
-            _arduinoPort.Close();
-        }
-    }
     // void ReleaseResources() {
     //     _sensorReadings.ReleaseResources();
     // }

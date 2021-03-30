@@ -9,16 +9,23 @@ using System;
 
 public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
 {
-    public string PortName = "COM4";
-    public int BaudRate = 115200; 
+    [SerializeField]
+    private string ArduinoPortName = "COM4";
+    [SerializeField]
+    private int ArduinoBaudRate = 115200;
     private SerialPort arduino;
     private BraceCmd armCmd;
     private Thread sendThread;
     private bool quitThread = false;
 
     void Start() {
-        arduino = new SerialPort(PortName, BaudRate);
-        arduino.Open();
+        _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
+        if (!arduino.IsOpen){
+            arduino.Open();
+        }
+        
+        DateTime startime =  DateTime.Now;
+        TimeSpan dur = TimeSpan.FromMilliseconds(3000);
 
         armCmd = new BraceCmd(
                 arduino, 
@@ -35,7 +42,7 @@ public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
 
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){
-                if (arduino.IsOpen) {
+                if (arduino != null && arduino.IsOpen) {
                     arduino.Close();
                 }       
             }
@@ -43,7 +50,7 @@ public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
     }
 
     ~EchoFramesFromUnity_VERSION_2() {
-        if (arduino.IsOpen) {
+        if (arduino != null && arduino.IsOpen) {
             arduino.Close();
         }
     }
