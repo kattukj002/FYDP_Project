@@ -299,7 +299,7 @@ public class SimulationForce : MonoBehaviour
         TimeSpan interval = TimeSpan.FromMilliseconds(10);
 
         while(!quitThread) {
-            if ((DateTime.Now - startTime) >= interval && armCmdMutex.WaitOne(100)) {
+            if ((DateTime.Now - startTime) >= interval && armCmdMutex.WaitOne(5)) {
                 _armCmd.Send();
                 armCmdMutex.ReleaseMutex();
                 startTime = DateTime.Now;
