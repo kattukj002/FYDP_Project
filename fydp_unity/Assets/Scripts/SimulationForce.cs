@@ -14,7 +14,8 @@ using UnityEngine.UI;
 public class SimulationForce : MonoBehaviour
 {
 
-    public Text txt;
+    public Text elbow_torque_text;
+    public Text shoulder_torque_text;
     public bool display_values = true;
 
     [SerializeField]
@@ -254,8 +255,8 @@ public class SimulationForce : MonoBehaviour
         // if (!FinalTestDisable) {
         //     if (display_values)
         //     {
-        //         txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
-        //         //txt.text = System.DateTime.Now.ToString();
+        //         elbow_torque_text.text = "Elbow Torque: " + elbowTorque.ToString() + " N-m";
+        //         shoulder_torque_text.text = "Shoulder Torque: " + cableMotorTorque.ToString() + " N-m";
         //     }
         // }
 
