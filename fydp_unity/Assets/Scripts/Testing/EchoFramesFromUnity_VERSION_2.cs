@@ -18,13 +18,8 @@ public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
 
     void Start() {
         arduino = new SerialPort(PortName, BaudRate);
-        // if (!arduino.IsOpen){
         arduino.Open();
-        // }
-        
-        // DateTime startime =  DateTime.Now;
-        // TimeSpan dur = TimeSpan.FromMilliseconds(3000);
-        // while (DateTime.Now - startime < dur) {}
+
         armCmd = new BraceCmd(
                 arduino, 
                 elbow_:new MotorCmdFormat(
@@ -38,7 +33,6 @@ public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
         armCmd.elbow.SetTorqueMove(1f);
         armCmd.shoulderDown.SetTorqueMove(2f);
     }
-
     //Changed to thread b/c of Oculus libraries stopping program with exceptions otherwise.
     void Update() {
         armCmd.Send();
