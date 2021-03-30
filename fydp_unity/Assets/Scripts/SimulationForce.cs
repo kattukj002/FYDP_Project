@@ -118,9 +118,6 @@ public class SimulationForce : MonoBehaviour
                 if (!_arduinoPort.IsOpen) {
                     throw new Exception("Unable to open port");
                 }
-                // DateTime startime =  DateTime.Now;
-                // TimeSpan dur = TimeSpan.FromMilliseconds(3000);
-                // while (DateTime.Now - startime < dur) {}
             //     _started = true;
             // }
 
@@ -221,11 +218,11 @@ public class SimulationForce : MonoBehaviour
 
     // int count = 0;
     // int period = 1;
-    // void FixedUpdate()
-    // {
-        // if(_sensorReadings == null) {
-        //     return;
-        // }
+    void FixedUpdate()
+    {
+        if(_sensorReadings == null) {
+            return;
+        }
         // if(!_sensorReadings.Update()) {
         //     Debug.Log("Could not get updated sensor readings.");
         //     _armMotionEstimators.EstimateUnobtainableNewPosition();
@@ -278,7 +275,7 @@ public class SimulationForce : MonoBehaviour
         
         //applyTorques(elbowTorque, cableMotorTorque);
         // _collisionForce.Set(0,0,0);
-    // }
+    }
 
     // void OnCollisionEnter(Collision collision){
         //Assume all collisions happen over one Time.fixedDeltaTime unit.
