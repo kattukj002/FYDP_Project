@@ -67,28 +67,28 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private bool FinalTestDisable = false;
 
-    // private class ArmMotionEstimators {
-    //     public MotionEstimatorFloat ElbowDeg;
-    //     public MotionEstimatorVector3 RightControllerPosition;
+    private class ArmMotionEstimators {
+        public MotionEstimatorFloat ElbowDeg;
+        public MotionEstimatorVector3 RightControllerPosition;
 
-    //     public ArmMotionEstimators(float timestepSeconds) {
-    //         ElbowDeg = new MotionEstimatorFloat(timestepSeconds);
-    //         RightControllerPosition = new MotionEstimatorVector3(timestepSeconds);
-    //     }
-    //     public void EstimateUnobtainableNewPosition() {
-    //         ElbowDeg.EstimateUnobtainableNewPosition();
-    //         RightControllerPosition.EstimateUnobtainableNewPosition();
-    //     }
+        public ArmMotionEstimators(float timestepSeconds) {
+            ElbowDeg = new MotionEstimatorFloat(timestepSeconds);
+            RightControllerPosition = new MotionEstimatorVector3(timestepSeconds);
+        }
+        public void EstimateUnobtainableNewPosition() {
+            ElbowDeg.EstimateUnobtainableNewPosition();
+            RightControllerPosition.EstimateUnobtainableNewPosition();
+        }
 
-    //     public void UpdateNewPosition(SensorData sensorData) {
-    //         ElbowDeg.UpdateNewPosition(sensorData.ElbowDeg);
-    //         RightControllerPosition.UpdateNewPosition(sensorData.RightControllerPosition);
-    //     }
+        public void UpdateNewPosition(SensorData sensorData) {
+            ElbowDeg.UpdateNewPosition(sensorData.ElbowDeg);
+            RightControllerPosition.UpdateNewPosition(sensorData.RightControllerPosition);
+        }
 
-    //     public bool Filled(){
-    //         return ElbowDeg.filled && RightControllerPosition.filled;
-    //     }
-    // }
+        public bool Filled(){
+            return ElbowDeg.filled && RightControllerPosition.filled;
+        }
+    }
     private bool _started = false;
     // private Mutex _portMutex = new Mutex();
 
@@ -107,10 +107,10 @@ public class SimulationForce : MonoBehaviour
             if(!_started) {
                 _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
                 //Will need to look into the correct values for this.
-                // _arduinoPort.WriteTimeout = SerialWriteTimeout;
-                // _arduinoPort.ReadTimeout = SerialReadTimeout;
-                // _arduinoPort.ReadBufferSize = SerialReadBufferSize;
-                // _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
+                _arduinoPort.WriteTimeout = SerialWriteTimeout;
+                _arduinoPort.ReadTimeout = SerialReadTimeout;
+                _arduinoPort.ReadBufferSize = SerialReadBufferSize;
+                _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
                 
                 _arduinoPort.Open();
                     // _arduinoPort.DiscardInBuffer();
@@ -170,7 +170,7 @@ public class SimulationForce : MonoBehaviour
                 ignoreImu:IgnoreImu,
                 FinalTestDisable:FinalTestDisable);
 
-        // _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
+        _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
 
         // EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
         //     if(state == PlayModeStateChange.ExitingPlayMode){
@@ -345,7 +345,7 @@ public class SimulationForce : MonoBehaviour
     
     private BraceCmd _armCmd;
     private ArmVectorModel _armModel;
-    // private ArmMotionEstimators _armMotionEstimators;
+    private ArmMotionEstimators _armMotionEstimators;
     private SerialPort _arduinoPort;
     private SensorReadings _sensorReadings = null;
 }
