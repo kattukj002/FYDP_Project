@@ -296,7 +296,7 @@ public class SimulationForce : MonoBehaviour
              newCmdReady = true;
         // }
     }
-    bool mult = false;
+    uint mult = false;
     void TxThreadFcn() {
 
         DateTime startTime = DateTime.Now;
