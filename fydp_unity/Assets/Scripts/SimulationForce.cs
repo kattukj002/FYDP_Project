@@ -125,7 +125,7 @@ public class SimulationForce : MonoBehaviour
                     stictionEncodedTorque:8),
                 shoulderDown_:new MotorCmdFormat(
                     torqueRatingNm:1.89f, torqueCmdFullScale:MotorPowerFraction * 89, gearRatio:ShoulderGearRatio, 
-                    stictionEncodedTorque:8), isCableMotor:true)
+                    stictionEncodedTorque:8, isCableMotor:true)
                 );
         }
 
