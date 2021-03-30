@@ -41,7 +41,7 @@ namespace FYDP {
                 if(_arduinoPort.IsOpen) {
                     //Debug.Log("CMD_FRAME:" + BitConverter.ToString(_cmdFrame));
                     _arduinoPort.Write(_cmdFrame, 0, _cmdFrameLength);
-                    _arduinoPort.DiscardOutBuffer();
+                    //_arduinoPort.DiscardOutBuffer();
                     Logging.PrintQtyScalar("ELBOW_CMD_ID", (int)elbow.Id);
                     Logging.PrintQtyScalar("ELBOW_CMD_TORQUE", elbow.Data, "N-m");
 

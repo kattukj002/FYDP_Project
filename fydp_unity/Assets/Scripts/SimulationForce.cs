@@ -142,11 +142,11 @@ public class SimulationForce : MonoBehaviour
             }
         };
 
-        float elbowTorque = 0.2f;
-        float cableMotorTorque = 0.2f;
+        float elbowTorque = 0f;
+        float cableMotorTorque = 0f;
         _armCmd.elbow.SetTorqueMove(-elbowTorque);
         _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
-
+        
         sendThread = new Thread(this.TxThreadFcn);
         sendThread.Start();
 
