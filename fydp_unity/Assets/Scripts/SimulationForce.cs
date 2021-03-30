@@ -151,14 +151,14 @@ public class SimulationForce : MonoBehaviour
         sendThread = new Thread(this.TxThreadFcn);
         sendThread.Start();
 
-        // CalibrationValues calibrationValues = new CalibrationValues();
-        // calibrationValues.UpperArmLength = UpperArmLength;
-        // calibrationValues.LowerArmLength = LowerArmLength;
-        // calibrationValues.ShoulderDistFromNeckBase = ShoulderDistFromNeckBase;
-        // calibrationValues.NeckBaseOffsetFromHeadset = NeckBaseOffsetFromHeadset;
-        // calibrationValues.CableMotorOffsetfromShoulder = CableMotorOffsetfromShoulder;
-        // calibrationValues.CableWinchRadius = CableWinchRadius;
-        // calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
+        CalibrationValues calibrationValues = new CalibrationValues();
+        calibrationValues.UpperArmLength = UpperArmLength;
+        calibrationValues.LowerArmLength = LowerArmLength;
+        calibrationValues.ShoulderDistFromNeckBase = ShoulderDistFromNeckBase;
+        calibrationValues.NeckBaseOffsetFromHeadset = NeckBaseOffsetFromHeadset;
+        calibrationValues.CableMotorOffsetfromShoulder = CableMotorOffsetfromShoulder;
+        calibrationValues.CableWinchRadius = CableWinchRadius;
+        calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
 
         _sensorReadings = new SensorReadings(
             new BraceSensorReader(_arduinoPort),//, _portMutex), 
