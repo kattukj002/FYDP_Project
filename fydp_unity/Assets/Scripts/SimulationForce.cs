@@ -281,9 +281,11 @@ public class SimulationForce : MonoBehaviour
                 elbowTorque = -elbowTorque;
                 _armCmd.elbow.SetTorqueHold(elbowTorque);
             }
-
             _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
             
+            Logging.PrintQtyScalar("ELBOW_TORQUE", elbowTorque, "N-m");
+            Logging.PrintQtyScalar("CABLE_MOTOR_TORQUE", cableMotorTorque, "N-m");
+
             newCmdReady = true;
         }
     }
@@ -307,7 +309,7 @@ public class SimulationForce : MonoBehaviour
     private Vector3 _collisionForce = new Vector3(0,0,0);
     
     
-    private BraceCmd _armCmd;
+    private volatile BraceCmd _armCmd;
     private ArmVectorModel _armModel;
     private ArmMotionEstimators _armMotionEstimators = null;
     private SerialPort _arduinoPort;
