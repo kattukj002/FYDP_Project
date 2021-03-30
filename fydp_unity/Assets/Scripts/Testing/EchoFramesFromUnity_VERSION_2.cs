@@ -32,7 +32,7 @@ public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
     }
 
     //Changed to thread b/c of Oculus libraries stopping program with exceptions otherwise.
-    void Update() {
+    void FixedUpdate() {
         float elbowTorque = 0.2f;
         float cableMotorTorque = 0.2f;
         armCmd.elbow.SetTorqueMove(elbowTorque);
