@@ -248,19 +248,19 @@ public class SimulationForce : MonoBehaviour
         
         
         //applyTorques(elbowTorque, cableMotorTorque);
-        // _collisionForce.Set(0,0,0);
+        _collisionForce.Set(0,0,0);
     }
 
-    // void OnCollisionEnter(Collision collision){
-        //Assume all collisions happen over one Time.fixedDeltaTime unit.
+    void OnCollisionEnter(Collision collision){
+        // Assume all collisions happen over one Time.fixedDeltaTime unit.
 
-        //Note to self: Add the hold collision force later. 
-        // _collisionForce = collision.impulse/Time.fixedDeltaTime;
-    // }
+        // Note to self: Add the hold collision force later. 
+        _collisionForce = collision.impulse/Time.fixedDeltaTime;
+    }
 
-    // void OnCollisionExit(Collision collision) {
-    //     _collisionForce.Set(0,0,0);
-    // }
+    void OnCollisionExit(Collision collision) {
+        _collisionForce.Set(0,0,0);
+    }
 
     // void applyTorques(float elbowTorque, float cableMotorTorque)
     // {
