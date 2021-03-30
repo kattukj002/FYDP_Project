@@ -103,15 +103,15 @@ public class SimulationForce : MonoBehaviour
             // if(!_started) {
                 _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
                 //Will need to look into the correct values for this.
-                _arduinoPort.WriteTimeout = SerialWriteTimeout;
-                _arduinoPort.ReadTimeout = SerialReadTimeout;
-                _arduinoPort.ReadBufferSize = SerialReadBufferSize;
-                _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
+                // _arduinoPort.WriteTimeout = SerialWriteTimeout;
+                // _arduinoPort.ReadTimeout = SerialReadTimeout;
+                // _arduinoPort.ReadBufferSize = SerialReadBufferSize;
+                // _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
 
                 if(!_arduinoPort.IsOpen) {
                     _arduinoPort.Open();
-                    _arduinoPort.DiscardInBuffer();
-                    _arduinoPort.DiscardOutBuffer();
+                    // _arduinoPort.DiscardInBuffer();
+                    // _arduinoPort.DiscardOutBuffer();
                 }
                 DateTime startime =  DateTime.Now;
 
@@ -119,9 +119,9 @@ public class SimulationForce : MonoBehaviour
             //     _started = true;
             // }
 
-            if (_arduinoPort.BreakState){
-                throw new Exception("Broken port!");
-            }
+            // if (_arduinoPort.BreakState){
+            //     throw new Exception("Broken port!");
+            // }
 
             _armCmd = new BraceCmd(
                 _arduinoPort, 
@@ -161,8 +161,8 @@ public class SimulationForce : MonoBehaviour
             if(state == PlayModeStateChange.ExitingPlayMode){
                 // this.ReleaseResources();
                 if(_arduinoPort.IsOpen) {
-                    _arduinoPort.DiscardInBuffer();
-                    _arduinoPort.DiscardOutBuffer();
+                    // _arduinoPort.DiscardInBuffer();
+                    // _arduinoPort.DiscardOutBuffer();
                     _arduinoPort.Close();
                 }
             }
@@ -172,16 +172,16 @@ public class SimulationForce : MonoBehaviour
     ~SimulationForce(){
     //     ReleaseResources();
         if(_arduinoPort.IsOpen) {
-            _arduinoPort.DiscardInBuffer();
-            _arduinoPort.DiscardOutBuffer();
+            // _arduinoPort.DiscardInBuffer();
+            // _arduinoPort.DiscardOutBuffer();
             _arduinoPort.Close();
         }
     }
     void OnApplicationQuit() {
     //     ReleaseResources();
         if(_arduinoPort.IsOpen) {
-            _arduinoPort.DiscardInBuffer();
-            _arduinoPort.DiscardOutBuffer();
+            // _arduinoPort.DiscardInBuffer();
+            // _arduinoPort.DiscardOutBuffer();
             _arduinoPort.Close();
         }
     }

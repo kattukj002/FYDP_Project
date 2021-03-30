@@ -48,7 +48,9 @@ public class EchoFramesFromUnity : MonoBehaviour
     }
     void EndThreads() {
         quitThread = true;
-        sendThread.Join();
+        if (sendThread.IsAlive) {
+            sendThread.Join();
+        }
     }
 
     //Changed to thread b/c of Oculus libraries stopping program with exceptions otherwise.
