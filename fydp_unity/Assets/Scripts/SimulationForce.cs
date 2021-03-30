@@ -93,9 +93,10 @@ public class SimulationForce : MonoBehaviour
     // private Mutex _portMutex = new Mutex();
 
     private Thread sendThread;
-    private bool quitThread = false;
+    private bool quitThread;
     void Start()
     {
+        quitThread = false;
         if(!FinalTestDisable) {
             XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
             controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
@@ -214,11 +215,11 @@ public class SimulationForce : MonoBehaviour
             }
         }
         
-        // if (_sensorReadings.Data.RightControllerSecondaryButtonPressed) {
-        //     ReleaseResources();
-        //     Start();
-        //     return;
-        // }
+        if (_sensorReadings.Data.RightControllerSecondaryButtonPressed) {
+            EndThreads();
+            Start();
+            return;
+        }
         // _simForce = Physics.gravity*_cachedMass + _collisionForce;
     
         // if (_cachedMass > 0){
