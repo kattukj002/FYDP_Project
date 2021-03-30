@@ -276,18 +276,13 @@ public class SimulationForce : MonoBehaviour
             // if (RemoveHoldCommands || movementInSameDirAsTorque || notMoving) {
                 
             //     elbowTorque = -elbowTorque;
-            //     _armCmd.elbow.SetTorqueMove(elbowTorque);
+                _armCmd.elbow.SetTorqueMove(elbowTorque);
             // } else {
             //     elbowTorque = -elbowTorque;
             //     _armCmd.elbow.SetTorqueHold(elbowTorque);
             // }
 
-            // _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
-            
-            // if (_portMutex.WaitOne(1)) {
-            //     _armCmd.Send();
-            //     _portMutex.ReleaseMutex();
-            // }
+            _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
             
             newCmdReady = true;
             armCmdMutex.ReleaseMutex();
@@ -303,15 +298,11 @@ public class SimulationForce : MonoBehaviour
                 if (armCmdMutex.WaitOne(5)) {
                     _armCmd.Send();
                     armCmdMutex.ReleaseMutex();
+                    newCmdReady = false;
                 }
                 startTime = DateTime.Now;
             }
         }
-        // if(newCmdReady && armCmdMutex.WaitOne(1)) {
-        //     // _armCmd.Send();
-        //     newCmdReady = false;
-        //     armCmdMutex.ReleaseMutex();
-        // }
     }
     private Mutex armCmdMutex = new Mutex();
     private bool newCmdReady = false;
