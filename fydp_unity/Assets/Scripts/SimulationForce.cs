@@ -109,9 +109,9 @@ public class SimulationForce : MonoBehaviour
                 _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
 
                 if(!_arduinoPort.IsOpen) {
+                    _arduinoPort.Open();
                     _arduinoPort.DiscardInBuffer();
                     _arduinoPort.DiscardOutBuffer();
-                    _arduinoPort.Open();
                 }
                 _started = true;
             }
