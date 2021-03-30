@@ -47,11 +47,6 @@ public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
         };
     }
 
-    ~EchoFramesFromUnity_VERSION_2() {
-        if (arduino != null && arduino.IsOpen) {
-            arduino.Close();
-        }
-    }
     //Changed to thread b/c of Oculus libraries stopping program with exceptions otherwise.
     void Update() {
         armCmd.Send();
