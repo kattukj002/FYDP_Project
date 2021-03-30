@@ -125,18 +125,18 @@ public class SimulationForce : MonoBehaviour
                     stictionEncodedTorque:8),
                 shoulderDown_:new MotorCmdFormat(
                     torqueRatingNm:1.89f, torqueCmdFullScale:MotorPowerFraction * 89, gearRatio:ShoulderGearRatio, 
-                    stictionEncodedTorque:8)//, isCableMotor:true)
+                    stictionEncodedTorque:8), isCableMotor:true)
                 );
         }
 
-        // CalibrationValues calibrationValues = new CalibrationValues();
-        // calibrationValues.UpperArmLength = UpperArmLength;
-        // calibrationValues.LowerArmLength = LowerArmLength;
-        // calibrationValues.ShoulderDistFromNeckBase = ShoulderDistFromNeckBase;
-        // calibrationValues.NeckBaseOffsetFromHeadset = NeckBaseOffsetFromHeadset;
-        // calibrationValues.CableMotorOffsetfromShoulder = CableMotorOffsetfromShoulder;
-        // calibrationValues.CableWinchRadius = CableWinchRadius;
-        // calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
+        CalibrationValues calibrationValues = new CalibrationValues();
+        calibrationValues.UpperArmLength = UpperArmLength;
+        calibrationValues.LowerArmLength = LowerArmLength;
+        calibrationValues.ShoulderDistFromNeckBase = ShoulderDistFromNeckBase;
+        calibrationValues.NeckBaseOffsetFromHeadset = NeckBaseOffsetFromHeadset;
+        calibrationValues.CableMotorOffsetfromShoulder = CableMotorOffsetfromShoulder;
+        calibrationValues.CableWinchRadius = CableWinchRadius;
+        calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
 
         // _sensorReadings = new SensorReadings(
         //     new BraceSensorReader(_arduinoPort, _portMutex), 
