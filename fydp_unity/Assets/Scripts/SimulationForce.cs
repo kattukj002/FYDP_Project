@@ -194,6 +194,7 @@ public class SimulationForce : MonoBehaviour
         if (sendThread.IsAlive) {
             sendThread.Join();
         }
+        _sensorReadings.ReleaseResources();
     }
 
     // ~SimulationForce(){
