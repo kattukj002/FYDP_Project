@@ -283,7 +283,7 @@ public class SimulationForce : MonoBehaviour
             // }
             // _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
 
-            _armCmd.elbow.SetTorqueMove(10);
+            _armCmd.elbow.SetTorqueMove(elbowTorque);
             
             //Logging.PrintQtyScalar("ELBOW_TORQUE", elbowTorque, "N-m");
             //Logging.PrintQtyScalar("CABLE_MOTOR_TORQUE", cableMotorTorque, "N-m");
