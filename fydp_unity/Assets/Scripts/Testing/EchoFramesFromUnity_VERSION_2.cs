@@ -9,17 +9,15 @@ using System;
 
 public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
 {
-    [SerializeField]
-    private string ArduinoPortName = "COM4";
-    [SerializeField]
-    private int ArduinoBaudRate = 115200;
+    public string PortName = "COM4";
+    public int BaudRate = 115200; 
     private SerialPort arduino;
     private BraceCmd armCmd;
     private Thread sendThread;
     private bool quitThread = false;
 
     void Start() {
-        arduino = new SerialPort(ArduinoPortName, ArduinoBaudRate);
+        arduino = new SerialPort(PortName, BaudRate);
         // if (!arduino.IsOpen){
         arduino.Open();
         // }
