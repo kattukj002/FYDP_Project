@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -95,9 +96,9 @@ public class SimulationForce : MonoBehaviour
     private Thread sendThread;
     private bool quitThread;   
     
-    IEnumerator Wait(float seconds)
+    public IEnumerator Wait()
     {
-    yield return new WaitForSeconds(seconds);
+    yield return new WaitForSeconds(1.0f);
     }
     void Start()
     {
@@ -110,8 +111,8 @@ public class SimulationForce : MonoBehaviour
         
         bool keepWaiting = true;
         while(keepWaiting) {
-            StartCoroutine(Wait(1.0f));
-            bool gotRightController = TryGetInputDevice(VRUtils.DeviceId.RightController, out InputDevice rightController);
+            StartCoroutine(Wait());
+            bool gotRightController = VRUtils.TryGetInputDevice(VRUtils.DeviceId.RightController, out InputDevice rightController);
             
             if (gotRightController) {
                 if (rightController.TryGetFeatureValue(CommonUsages.secondaryButton, out bool rightControllerSecondaryButtonPressed)) {
