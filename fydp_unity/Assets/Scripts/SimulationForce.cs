@@ -190,8 +190,8 @@ public class SimulationForce : MonoBehaviour
         _cachedMass = 0;
     }
 
-    // int count = 0;
-    // int period = 1;
+    int count = 0;
+    int period = 1;
     void FixedUpdate()
     {
         if(_sensorReadings == null) {
