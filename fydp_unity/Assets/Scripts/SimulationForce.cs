@@ -314,7 +314,7 @@ public class SimulationForce : MonoBehaviour
     private Vector3 _collisionForce = new Vector3(0,0,0);
     
     
-    private volatile BraceCmd _armCmd;
+    private static volatile BraceCmd _armCmd;
     private ArmVectorModel _armModel;
     private ArmMotionEstimators _armMotionEstimators = null;
     private SerialPort _arduinoPort;
