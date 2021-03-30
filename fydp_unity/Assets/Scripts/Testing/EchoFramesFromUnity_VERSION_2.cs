@@ -20,9 +20,9 @@ public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
 
     void Start() {
         arduino = new SerialPort(ArduinoPortName, ArduinoBaudRate);
-        if (!arduino.IsOpen){
-            arduino.Open();
-        }
+        // if (!arduino.IsOpen){
+        arduino.Open();
+        // }
         
         // DateTime startime =  DateTime.Now;
         // TimeSpan dur = TimeSpan.FromMilliseconds(3000);
