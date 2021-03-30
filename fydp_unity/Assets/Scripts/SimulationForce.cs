@@ -263,8 +263,6 @@ public class SimulationForce : MonoBehaviour
         _collisionForce.Set(0,0,0);
     }
 
-    DateTime myTime = DateTime.Now;
-    TimeSpan dur = TimeSpan.FromMilliseconds(1000);
     void applyTorques(float elbowTorque, float cableMotorTorque)
     {
         if (!newCmdReady) {
@@ -285,14 +283,16 @@ public class SimulationForce : MonoBehaviour
             }
             _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
 
-             newCmdReady = true;
+            newCmdReady = true;
         }
     }
-    uint mult = 0;
+    // DateTime myTime = DateTime.Now;
+    // TimeSpan dur = TimeSpan.FromMilliseconds(1000);
+    // uint mult = 0;
     void TxThreadFcn() {
 
         DateTime startTime = DateTime.Now;
-        TimeSpan interval = TimeSpan.FromMilliseconds(1);
+        TimeSpan interval = TimeSpan.FromMilliseconds(5);
 
         while(!quitThread) {
             // if (DateTime.Now - myTime > dur) {
