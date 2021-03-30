@@ -319,9 +319,16 @@ public class SimulationForce : MonoBehaviour
         float cableMotorTorque = 0.2f;
         _armCmd.elbow.SetTorqueHold(-elbowTorque);
         _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
-        
-        _armCmd.Send();
 
+        DateTime startTime = DateTime.Now;
+        TimeSpan interval = TimeSpan.FromMilliseconds(10);
+
+        while(!quitThread) {
+            if ((DateTime.Now - startTime) >= interval) {
+                armCmd.Send();
+                startTime = DateTime.Now;
+            }
+        }
         // if(newCmdReady && armCmdMutex.WaitOne(1)) {
         //     // _armCmd.Send();
         //     newCmdReady = false;
