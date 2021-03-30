@@ -265,7 +265,7 @@ public class SimulationForce : MonoBehaviour
 
     void applyTorques(float elbowTorque, float cableMotorTorque)
     {
-        if (!newCmdReady) {
+        // if (!newCmdReady) {
             // bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
             //     Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
             //     Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
@@ -283,13 +283,13 @@ public class SimulationForce : MonoBehaviour
             // }
             // _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
 
-            _armCmd.elbow.SetTorqueMove(10);
+            _armCmd.elbow.SetTorqueMove(elbowTorque);
             
             Logging.PrintQtyScalar("ELBOW_TORQUE", elbowTorque, "N-m");
             //Logging.PrintQtyScalar("CABLE_MOTOR_TORQUE", cableMotorTorque, "N-m");
 
-            newCmdReady = true;
-        }
+             newCmdReady = true;
+        // }
     }
     void TxThreadFcn() {
 
