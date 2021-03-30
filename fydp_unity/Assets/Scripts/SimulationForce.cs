@@ -172,17 +172,17 @@ public class SimulationForce : MonoBehaviour
     //     _sensorReadings.ReleaseResources();
     // }
 
-    // void GetHeldObjectMass(XRBaseInteractable interactable){
-    //     List<Collider> colliderList = interactable.colliders;
-    //     _cachedMass = colliderList[0].attachedRigidbody.mass;
-    // }
+    void GetHeldObjectMass(XRBaseInteractable interactable){
+        List<Collider> colliderList = interactable.colliders;
+        _cachedMass = colliderList[0].attachedRigidbody.mass;
+    }
 
-    // void ZeroHeldObjectMass(XRBaseInteractable interactable) {
-    //     _cachedMass = 0;
-    // }
+    void ZeroHeldObjectMass(XRBaseInteractable interactable) {
+        _cachedMass = 0;
+    }
 
-    // int count = 0;
-    // int period = 1;
+    int count = 0;
+    int period = 1;
     void FixedUpdate()
     {
         // if(_sensorReadings == null) {
