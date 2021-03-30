@@ -24,7 +24,7 @@ namespace FYDP {
 
                 _arduinoPort = arduinoPort;
                 if (!_arduinoPort.IsOpen) {
-                    throw new Exception("Serial port not open!")
+                    throw new Exception("Serial port not open!");
                 }
             }
 
