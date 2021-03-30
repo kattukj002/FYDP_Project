@@ -99,7 +99,11 @@ public class SimulationForce : MonoBehaviour
         // }
         
         // if(!UseDummyInputs) {
+        DateTime startime =  DateTime.Now;
 
+        while (DateTime.Now - startime <  TimeSpan.FromMilliseconds(3000)) {
+
+        }
             // if(!_started) {
                 _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
                 //Will need to look into the correct values for this.
@@ -127,7 +131,7 @@ public class SimulationForce : MonoBehaviour
                     stictionEncodedTorque:8),
                 shoulderDown_:new MotorCmdFormat(
                     torqueRatingNm:1.89f, torqueCmdFullScale:MotorPowerFraction * 89, gearRatio:ShoulderGearRatio, 
-                    stictionEncodedTorque:8, isCableMotor:true)
+                    stictionEncodedTorque:8)//, isCableMotor:true)
                 );
         // }
 
