@@ -310,11 +310,11 @@ public class SimulationForce : MonoBehaviour
         //     armCmdMutex.ReleaseMutex();
         // }
     }
-    // private Mutex armCmdMutex = new Mutex();
-    // private bool newCmdReady;
-    // private Vector3 _simForce;
-    // public float _cachedMass = 0f;
-    // private Vector3 _collisionForce = new Vector3(0,0,0);
+    private Mutex armCmdMutex = new Mutex();
+    private bool newCmdReady;
+    private Vector3 _simForce;
+    public float _cachedMass = 0f;
+    private Vector3 _collisionForce = new Vector3(0,0,0);
     
     
     private BraceCmd _armCmd;
