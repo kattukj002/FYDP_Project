@@ -90,7 +90,7 @@ public class SimulationForce : MonoBehaviour
         }
     }
     private bool _started = false;
-    private Mutex _portMutex = new Mutex();
+    // private Mutex _portMutex = new Mutex();
 
     private Thread sendThread;
     private bool quitThread;
@@ -160,7 +160,7 @@ public class SimulationForce : MonoBehaviour
         calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
 
         _sensorReadings = new SensorReadings(
-            new BraceSensorReader(_arduinoPort, _portMutex), 
+            new BraceSensorReader(_arduinoPort), //_portMutex), 
             TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
 
         _armModel = new ArmVectorModel(_sensorReadings,
@@ -296,29 +296,31 @@ public class SimulationForce : MonoBehaviour
              newCmdReady = true;
         // }
     }
+    bool mult = false;
     void TxThreadFcn() {
 
         DateTime startTime = DateTime.Now;
-        TimeSpan interval = TimeSpan.FromMilliseconds(10);
+        TimeSpan interval = TimeSpan.FromMilliseconds(1);
 
         while(!quitThread) {
             if ((DateTime.Now - startTime) >= interval && newCmdReady) {
-                if (_portMutex.WaitOne(2)) {
-                    var rand = new System.Random();
+                // if (_portMutex.WaitOne(1)) {
+                    
                     if (DateTime.Now - myTime > dur) {
-                        _armCmd.elbow.SetTorqueMove((float)rand.NextDouble()*5);
+                        mult ^= 1;
+                        _armCmd.elbow.SetTorqueMove(5 * (int)mult);
                         myTime = DateTime.Now;
                     }
                     _armCmd.Send();
-                    _portMutex.ReleaseMutex();
-                }
-                newCmdReady = false;
+                //     _portMutex.ReleaseMutex();
+                // }
+                //newCmdReady = false;
                 startTime = DateTime.Now;
             }
         }
     }
     private Mutex armCmdMutex = new Mutex();
-    private bool newCmdReady = false;
+    private bool newCmdReady = true;
     private Vector3 _simForce;
     public float _cachedMass = 0f;
     private Vector3 _collisionForce = new Vector3(0,0,0);
