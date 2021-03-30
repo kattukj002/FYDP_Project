@@ -160,9 +160,9 @@ public class SimulationForce : MonoBehaviour
         // calibrationValues.CableWinchRadius = CableWinchRadius;
         // calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
 
-        // _sensorReadings = new SensorReadings(
-        //     new BraceSensorReader(_arduinoPort, _portMutex), 
-        //     TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
+        _sensorReadings = new SensorReadings(
+            new BraceSensorReader(_arduinoPort);//, _portMutex), 
+            TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
 
         // _armModel = new ArmVectorModel(_sensorReadings,
         //         calibrationValues, 
