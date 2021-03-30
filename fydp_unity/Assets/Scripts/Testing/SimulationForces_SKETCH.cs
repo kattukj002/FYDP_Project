@@ -146,7 +146,7 @@ public class SimulationForce_SKETCH : MonoBehaviour
         float elbowTorque = 0.2f;
         float cableMotorTorque = 0.2f;
         _armCmd.elbow.SetTorqueMove(-elbowTorque);
-        _armCmd.shoulderDown.SetTorqueMove(-cableMotoroveTorque);
+        _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
 
         sendThread = new Thread(this.TxThreadFcn);
         sendThread.Start();
