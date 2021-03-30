@@ -92,15 +92,15 @@ public class SimulationForce : MonoBehaviour
     private Mutex _portMutex = new Mutex();
     void Start()
     {
-        // if(!FinalTestDisable) {
-        //     XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
-        //     controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
-        //     controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
-        // }
+        if(!FinalTestDisable) {
+            XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
+            controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
+            controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
+        }
         
         if(!UseDummyInputs) {
 
-            // if(!_started) {
+            if(!_started) {
                 _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
                 //Will need to look into the correct values for this.
                 _arduinoPort.WriteTimeout = SerialWriteTimeout;
@@ -111,8 +111,8 @@ public class SimulationForce : MonoBehaviour
                 if(!_arduinoPort.IsOpen) {
                     _arduinoPort.Open();
                 }
-                // _started = true;
-            // }
+                _started = true;
+            }
 
             if (_arduinoPort.BreakState){
                 throw new Exception("Broken port!");
