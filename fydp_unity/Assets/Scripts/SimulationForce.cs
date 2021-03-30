@@ -138,39 +138,39 @@ public class SimulationForce : MonoBehaviour
         calibrationValues.CableWinchRadius = CableWinchRadius;
         calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
 
-        _sensorReadings = new SensorReadings(
-            new BraceSensorReader(_arduinoPort, _portMutex), 
-            TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
+        // _sensorReadings = new SensorReadings(
+        //     new BraceSensorReader(_arduinoPort, _portMutex), 
+        //     TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
 
-        _armModel = new ArmVectorModel(_sensorReadings,
-                calibrationValues, 
-                useDummyInputs: UseDummyInputs,
-                printIntermediateValues: PrintIntermediateValues,
-                useLeftControllerAsElbowTracker: UseLeftControllerAsElbowTracker,
-                ignoreImu:IgnoreImu,
-                FinalTestDisable:FinalTestDisable);
+        // _armModel = new ArmVectorModel(_sensorReadings,
+        //         calibrationValues, 
+        //         useDummyInputs: UseDummyInputs,
+        //         printIntermediateValues: PrintIntermediateValues,
+        //         useLeftControllerAsElbowTracker: UseLeftControllerAsElbowTracker,
+        //         ignoreImu:IgnoreImu,
+        //         FinalTestDisable:FinalTestDisable);
 
         _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
 
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){
-                this.ReleaseResources();
+                // this.ReleaseResources();
                 _arduinoPort.Close();
             }
         };
     }
 
     ~SimulationForce(){
-        ReleaseResources();
-        _arduinoPort.Close();
+    //     ReleaseResources();
+    //     _arduinoPort.Close();
     }
     void OnApplicationQuit() {
-        ReleaseResources();
-        _arduinoPort.Close();
+    //     ReleaseResources();
+    //     _arduinoPort.Close();
     }
-    void ReleaseResources() {
-        _sensorReadings.ReleaseResources();
-    }
+    // void ReleaseResources() {
+    //     _sensorReadings.ReleaseResources();
+    // }
 
     void GetHeldObjectMass(XRBaseInteractable interactable){
         List<Collider> colliderList = interactable.colliders;
@@ -210,7 +210,7 @@ public class SimulationForce : MonoBehaviour
         //     Start();
         //     return;
         // }
-        // _simForce = Physics.gravity*_cachedMass + _collisionForce;
+        _simForce = Physics.gravity*_cachedMass + _collisionForce;
     
         // if (_cachedMass > 0){
         //     _simForce += _armMotionEstimators.RightControllerPosition.EstimateAcceleration() * ArmMass * 
@@ -221,13 +221,13 @@ public class SimulationForce : MonoBehaviour
         //                                 out float elbowTorque, 
         //                                 out float cableMotorTorque);
         
-        // if (!FinalTestDisable) {
-        //     if (display_values)
-        //     {
-        //         txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
-        //         //txt.text = System.DateTime.Now.ToString();
-        //     }
-        // }
+        if (!FinalTestDisable) {
+            if (display_values)
+            {
+                txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
+                //txt.text = System.DateTime.Now.ToString();
+            }
+        }
 
         // if(PrintIntermediateValues) {
         //     Logging.PrintQtyVector3("SIM_FORCE", _simForce, "N");
