@@ -165,13 +165,13 @@ public class SimulationForce : MonoBehaviour
             new BraceSensorReader(_arduinoPort),//, _portMutex), 
             TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
 
-        // _armModel = new ArmVectorModel(_sensorReadings,
-        //         calibrationValues, 
-        //         useDummyInputs: UseDummyInputs,
-        //         printIntermediateValues: PrintIntermediateValues,
-        //         useLeftControllerAsElbowTracker: UseLeftControllerAsElbowTracker,
-        //         ignoreImu:IgnoreImu,
-        //         FinalTestDisable:FinalTestDisable);
+        _armModel = new ArmVectorModel(_sensorReadings,
+                calibrationValues, 
+                useDummyInputs: UseDummyInputs,
+                printIntermediateValues: PrintIntermediateValues,
+                useLeftControllerAsElbowTracker: UseLeftControllerAsElbowTracker,
+                ignoreImu:IgnoreImu,
+                FinalTestDisable:FinalTestDisable);
 
         // _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
 
@@ -195,6 +195,7 @@ public class SimulationForce : MonoBehaviour
         if (sendThread.IsAlive) {
             sendThread.Join();
         }
+        _sensorReadings.ReleaseResources();
     }
 
     // ~SimulationForce(){
@@ -346,7 +347,7 @@ public class SimulationForce : MonoBehaviour
     
     
     private BraceCmd _armCmd;
-    // private ArmVectorModel _armModel;
+    private ArmVectorModel _armModel;
     // private ArmMotionEstimators _armMotionEstimators;
     private SerialPort _arduinoPort;
     private SensorReadings _sensorReadings = null;
