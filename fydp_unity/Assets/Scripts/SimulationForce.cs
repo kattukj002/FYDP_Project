@@ -107,7 +107,7 @@ public class SimulationForce : MonoBehaviour
                 // _arduinoPort.ReadTimeout = SerialReadTimeout;
                 // _arduinoPort.ReadBufferSize = SerialReadBufferSize;
                 // _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
-
+                
                 if(!_arduinoPort.IsOpen) {
                     _arduinoPort.Open();
                     // _arduinoPort.DiscardInBuffer();
@@ -160,7 +160,7 @@ public class SimulationForce : MonoBehaviour
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){
                 // this.ReleaseResources();
-                if(_arduinoPort.IsOpen) {
+                if(_arduinoPort != null && _arduinoPort.IsOpen) {
                     // _arduinoPort.DiscardInBuffer();
                     // _arduinoPort.DiscardOutBuffer();
                     _arduinoPort.Close();
@@ -171,7 +171,7 @@ public class SimulationForce : MonoBehaviour
 
     ~SimulationForce(){
     //     ReleaseResources();
-        if(_arduinoPort.IsOpen) {
+        if(_arduinoPort != null && _arduinoPort.IsOpen) {
             // _arduinoPort.DiscardInBuffer();
             // _arduinoPort.DiscardOutBuffer();
             _arduinoPort.Close();
@@ -179,7 +179,7 @@ public class SimulationForce : MonoBehaviour
     }
     void OnApplicationQuit() {
     //     ReleaseResources();
-        if(_arduinoPort.IsOpen) {
+        if(_arduinoPort != null && _arduinoPort.IsOpen) {
             // _arduinoPort.DiscardInBuffer();
             // _arduinoPort.DiscardOutBuffer();
             _arduinoPort.Close();
