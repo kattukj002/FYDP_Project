@@ -116,6 +116,9 @@ public class SimulationForce : MonoBehaviour
                     // _arduinoPort.DiscardInBuffer();
                     // _arduinoPort.DiscardOutBuffer();
                 }
+                if (!_arduinoPort.IsOpen) {
+                    throw new Exception("Unable to open port");
+                }
                 // DateTime startime =  DateTime.Now;
                 // TimeSpan dur = TimeSpan.FromMilliseconds(3000);
                 // while (DateTime.Now - startime < dur) {}
@@ -321,10 +324,11 @@ public class SimulationForce : MonoBehaviour
         _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
 
         DateTime startTime = DateTime.Now;
-        TimeSpan interval = TimeSpan.FromMilliseconds(10);
+        TimeSpan interval = TimeSpan.FromMilliseconds(1000);
 
         while(!quitThread) {
             if ((DateTime.Now - startTime) >= interval) {
+                Debug.Log("SENDING!!!!");
                 _armCmd.Send();
                 startTime = DateTime.Now;
             }
