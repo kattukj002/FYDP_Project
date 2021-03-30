@@ -157,24 +157,30 @@ public class SimulationForce : MonoBehaviour
         EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
             if(state == PlayModeStateChange.ExitingPlayMode){
                 // this.ReleaseResources();
-                _arduinoPort.DiscardInBuffer();
+                if(_arduinoPort.IsOpen) {
+                    _arduinoPort.DiscardInBuffer();
                     _arduinoPort.DiscardOutBuffer();
-                _arduinoPort.Close();
+                    _arduinoPort.Close();
+                }
             }
         };
     }
 
     ~SimulationForce(){
     //     ReleaseResources();
-            _arduinoPort.DiscardInBuffer();
+        if(_arduinoPort.IsOpen) {
+                    _arduinoPort.DiscardInBuffer();
                     _arduinoPort.DiscardOutBuffer();
-        _arduinoPort.Close();
+                    _arduinoPort.Close();
+                }
     }
     void OnApplicationQuit() {
     //     ReleaseResources();
-        _arduinoPort.DiscardInBuffer();
-        _arduinoPort.DiscardOutBuffer();
-        _arduinoPort.Close();
+        if(_arduinoPort.IsOpen) {
+                    _arduinoPort.DiscardInBuffer();
+                    _arduinoPort.DiscardOutBuffer();
+                    _arduinoPort.Close();
+                }
     }
     // void ReleaseResources() {
     //     _sensorReadings.ReleaseResources();
