@@ -231,21 +231,21 @@ public class SimulationForce : MonoBehaviour
                                         out float elbowTorque, 
                                         out float cableMotorTorque);
         
-        // if (!FinalTestDisable) {
-        //     if (display_values)
-        //     {
-        //         elbow_torque_text.text = "Elbow Torque: " + elbowTorque.ToString() + " N-m";
-        //         shoulder_torque_text.text = "Shoulder Torque: " + cableMotorTorque.ToString() + " N-m";
-        //     }
-        // }
+        if (!FinalTestDisable) {
+            if (display_values)
+            {
+                elbow_torque_text.text = "Elbow Torque: " + elbowTorque.ToString() + " N-m";
+                shoulder_torque_text.text = "Shoulder Torque: " + cableMotorTorque.ToString() + " N-m";
+            }
+        }
 
-        // if(PrintIntermediateValues) {
-        //     Logging.PrintQtyVector3("SIM_FORCE", _simForce, "N");
-        //     Logging.PrintQtyScalar("ELBOW_TORQUE", elbowTorque, "N-m");
-        //     Logging.PrintQtyVector3("HAND_ACCEL", _armMotionEstimators.RightControllerPosition.EstimateAcceleration(), "m/s_sqr");
-        //     Logging.PrintQtyScalar("ELBOW_DEG_VELOCITY", _armMotionEstimators.ElbowDeg.EstimateVelocity(), "deg/s");
-        //     Logging.PrintQtyScalar("CABLE_MOTOR_TORQUE", cableMotorTorque, "N-m");
-        // }
+        if(PrintIntermediateValues) {
+            Logging.PrintQtyVector3("SIM_FORCE", _simForce, "N");
+            Logging.PrintQtyScalar("ELBOW_TORQUE", elbowTorque, "N-m");
+            Logging.PrintQtyVector3("HAND_ACCEL", _armMotionEstimators.RightControllerPosition.EstimateAcceleration(), "m/s_sqr");
+            Logging.PrintQtyScalar("ELBOW_DEG_VELOCITY", _armMotionEstimators.ElbowDeg.EstimateVelocity(), "deg/s");
+            Logging.PrintQtyScalar("CABLE_MOTOR_TORQUE", cableMotorTorque, "N-m");
+        }
         
         
         //applyTorques(elbowTorque, cableMotorTorque);
