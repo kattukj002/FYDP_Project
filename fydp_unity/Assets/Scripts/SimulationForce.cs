@@ -265,7 +265,7 @@ public class SimulationForce : MonoBehaviour
 
     void applyTorques(float elbowTorque, float cableMotorTorque)
     {
-        if(armCmdMutex.WaitOne(1)) {
+        if (!newCmdReady) {
             // bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
             //     Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
             //     Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
@@ -289,19 +289,18 @@ public class SimulationForce : MonoBehaviour
             //     _portMutex.ReleaseMutex();
             // }
             
-            // newCmdReady = true;
-            armCmdMutex.ReleaseMutex();
+            newCmdReady = true;
         }
     }
     void TxThreadFcn() {
 
         DateTime startTime = DateTime.Now;
-        TimeSpan interval = TimeSpan.FromMilliseconds(1000);
+        TimeSpan interval = TimeSpan.FromMilliseconds(10);
 
         while(!quitThread) {
-            if ((DateTime.Now - startTime) >= interval) {
-                Debug.Log("SENDING!!!!");
+            if ((DateTime.Now - startTime) >= interval && newCmdReady) {
                 _armCmd.Send();
+                newCmdReady = false;
                 startTime = DateTime.Now;
             }
         }
