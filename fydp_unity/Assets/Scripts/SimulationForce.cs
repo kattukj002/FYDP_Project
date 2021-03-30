@@ -90,6 +90,9 @@ public class SimulationForce : MonoBehaviour
     // }
     // private bool _started = false;
     // private Mutex _portMutex = new Mutex();
+
+    private Thread sendThread;
+    private bool quitThread = false;
     void Start()
     {
         // if(!FinalTestDisable) {
@@ -133,6 +136,14 @@ public class SimulationForce : MonoBehaviour
                     stictionEncodedTorque:8)//, isCableMotor:true)
                 );
         // }
+        EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
+            if(state == PlayModeStateChange.ExitingPlayMode){
+                this.EndThreads();
+            }
+        };
+
+        sendThread = new Thread(this.TxThreadFcn);
+        sendThread.Start();
 
         // CalibrationValues calibrationValues = new CalibrationValues();
         // calibrationValues.UpperArmLength = UpperArmLength;
@@ -167,6 +178,16 @@ public class SimulationForce : MonoBehaviour
         //         }
         //     }
         // };
+    }
+
+    void OnApplicationQuit() {
+        EndThreads();
+    }
+    void EndThreads() {
+        quitThread = true;
+        if (sendThread.IsAlive) {
+            sendThread.Join();
+        }
     }
 
     // ~SimulationForce(){
@@ -292,7 +313,7 @@ public class SimulationForce : MonoBehaviour
         //     armCmdMutex.ReleaseMutex();
         // }
     // }
-    void Update() {
+    void TxThreadFcn() {
 
         float elbowTorque = 0.2f;
         float cableMotorTorque = 0.2f;
