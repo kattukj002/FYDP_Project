@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -11,11 +11,10 @@ using FYDP.Utils;
 using UnityEditor;
 using UnityEngine.UI;
 
-public class SimulationForce : MonoBehaviour
+public class SimulationForce_SKETCH : MonoBehaviour
 {
 
-    public Text elbow_torque_text;
-    public Text shoulder_torque_text;
+    public Text txt;
     public bool display_values = true;
 
     [SerializeField]
@@ -161,9 +160,9 @@ public class SimulationForce : MonoBehaviour
         // calibrationValues.CableWinchRadius = CableWinchRadius;
         // calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
 
-        _sensorReadings = new SensorReadings(
-            new BraceSensorReader(_arduinoPort),//, _portMutex), 
-            TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
+        // _sensorReadings = new SensorReadings(
+        //     new BraceSensorReader(_arduinoPort, _portMutex), 
+        //     TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
 
         // _armModel = new ArmVectorModel(_sensorReadings,
         //         calibrationValues, 
@@ -187,9 +186,9 @@ public class SimulationForce : MonoBehaviour
         // };
     }
 
-    // void OnApplicationQuit() {
-    //     EndThreads();
-    // }
+    void OnApplicationQuit() {
+        EndThreads();
+    }
     void EndThreads() {
         quitThread = true;
         if (sendThread.IsAlive) {
@@ -261,8 +260,8 @@ public class SimulationForce : MonoBehaviour
         // if (!FinalTestDisable) {
         //     if (display_values)
         //     {
-        //         elbow_torque_text.text = "Elbow Torque: " + elbowTorque.ToString() + " N-m";
-        //         shoulder_torque_text.text = "Shoulder Torque: " + cableMotorTorque.ToString() + " N-m";
+        //         txt.text = "Elbow Torque: " + elbowTorque.ToString() + " N";
+        //         //txt.text = System.DateTime.Now.ToString();
         //     }
         // }
 
@@ -349,5 +348,5 @@ public class SimulationForce : MonoBehaviour
     // private ArmVectorModel _armModel;
     // private ArmMotionEstimators _armMotionEstimators;
     private SerialPort _arduinoPort;
-    private SensorReadings _sensorReadings = null;
+    // private SensorReadings _sensorReadings = null;
 }
