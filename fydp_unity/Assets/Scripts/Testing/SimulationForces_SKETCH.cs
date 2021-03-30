@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -146,7 +146,7 @@ public class SimulationForce : MonoBehaviour
         float elbowTorque = 0.2f;
         float cableMotorTorque = 0.2f;
         _armCmd.elbow.SetTorqueMove(-elbowTorque);
-        _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
+        _armCmd.shoulderDown.SetTorqueMove(-cableMotoroveTorque);
 
         sendThread = new Thread(this.TxThreadFcn);
         sendThread.Start();
@@ -186,9 +186,9 @@ public class SimulationForce : MonoBehaviour
         // };
     }
 
-    // void OnApplicationQuit() {
-    //     EndThreads();
-    // }
+    void OnApplicationQuit() {
+        EndThreads();
+    }
     void EndThreads() {
         quitThread = true;
         if (sendThread.IsAlive) {
