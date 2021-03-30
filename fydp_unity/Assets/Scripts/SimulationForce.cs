@@ -66,42 +66,42 @@ public class SimulationForce : MonoBehaviour
     [SerializeField]
     private bool FinalTestDisable = false;
 
-    private class ArmMotionEstimators {
-        public MotionEstimatorFloat ElbowDeg;
-        public MotionEstimatorVector3 RightControllerPosition;
+    // private class ArmMotionEstimators {
+    //     public MotionEstimatorFloat ElbowDeg;
+    //     public MotionEstimatorVector3 RightControllerPosition;
 
-        public ArmMotionEstimators(float timestepSeconds) {
-            ElbowDeg = new MotionEstimatorFloat(timestepSeconds);
-            RightControllerPosition = new MotionEstimatorVector3(timestepSeconds);
-        }
-        public void EstimateUnobtainableNewPosition() {
-            ElbowDeg.EstimateUnobtainableNewPosition();
-            RightControllerPosition.EstimateUnobtainableNewPosition();
-        }
+    //     public ArmMotionEstimators(float timestepSeconds) {
+    //         ElbowDeg = new MotionEstimatorFloat(timestepSeconds);
+    //         RightControllerPosition = new MotionEstimatorVector3(timestepSeconds);
+    //     }
+    //     public void EstimateUnobtainableNewPosition() {
+    //         ElbowDeg.EstimateUnobtainableNewPosition();
+    //         RightControllerPosition.EstimateUnobtainableNewPosition();
+    //     }
 
-        public void UpdateNewPosition(SensorData sensorData) {
-            ElbowDeg.UpdateNewPosition(sensorData.ElbowDeg);
-            RightControllerPosition.UpdateNewPosition(sensorData.RightControllerPosition);
-        }
+    //     public void UpdateNewPosition(SensorData sensorData) {
+    //         ElbowDeg.UpdateNewPosition(sensorData.ElbowDeg);
+    //         RightControllerPosition.UpdateNewPosition(sensorData.RightControllerPosition);
+    //     }
 
-        public bool Filled(){
-            return ElbowDeg.filled && RightControllerPosition.filled;
-        }
-    }
-    private bool _started = false;
-    private Mutex _portMutex = new Mutex();
+    //     public bool Filled(){
+    //         return ElbowDeg.filled && RightControllerPosition.filled;
+    //     }
+    // }
+    // private bool _started = false;
+    // private Mutex _portMutex = new Mutex();
     void Start()
     {
-        if(!FinalTestDisable) {
-            XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
-            controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
-            controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
-        }
+        // if(!FinalTestDisable) {
+        //     XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
+        //     controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
+        //     controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
+        // }
         
         if(!UseDummyInputs) {
 
-            if(!_started) {
-                _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
+            // if(!_started) {
+            //     _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
                 //Will need to look into the correct values for this.
                 _arduinoPort.WriteTimeout = SerialWriteTimeout;
                 _arduinoPort.ReadTimeout = SerialReadTimeout;
@@ -113,8 +113,8 @@ public class SimulationForce : MonoBehaviour
                     _arduinoPort.DiscardInBuffer();
                     _arduinoPort.DiscardOutBuffer();
                 }
-                _started = true;
-            }
+            //     _started = true;
+            // }
 
             if (_arduinoPort.BreakState){
                 throw new Exception("Broken port!");
@@ -131,14 +131,14 @@ public class SimulationForce : MonoBehaviour
                 );
         }
 
-        CalibrationValues calibrationValues = new CalibrationValues();
-        calibrationValues.UpperArmLength = UpperArmLength;
-        calibrationValues.LowerArmLength = LowerArmLength;
-        calibrationValues.ShoulderDistFromNeckBase = ShoulderDistFromNeckBase;
-        calibrationValues.NeckBaseOffsetFromHeadset = NeckBaseOffsetFromHeadset;
-        calibrationValues.CableMotorOffsetfromShoulder = CableMotorOffsetfromShoulder;
-        calibrationValues.CableWinchRadius = CableWinchRadius;
-        calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
+        // CalibrationValues calibrationValues = new CalibrationValues();
+        // calibrationValues.UpperArmLength = UpperArmLength;
+        // calibrationValues.LowerArmLength = LowerArmLength;
+        // calibrationValues.ShoulderDistFromNeckBase = ShoulderDistFromNeckBase;
+        // calibrationValues.NeckBaseOffsetFromHeadset = NeckBaseOffsetFromHeadset;
+        // calibrationValues.CableMotorOffsetfromShoulder = CableMotorOffsetfromShoulder;
+        // calibrationValues.CableWinchRadius = CableWinchRadius;
+        // calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
 
         // _sensorReadings = new SensorReadings(
         //     new BraceSensorReader(_arduinoPort, _portMutex), 
@@ -169,34 +169,34 @@ public class SimulationForce : MonoBehaviour
     ~SimulationForce(){
     //     ReleaseResources();
         if(_arduinoPort.IsOpen) {
-                    _arduinoPort.DiscardInBuffer();
-                    _arduinoPort.DiscardOutBuffer();
-                    _arduinoPort.Close();
-                }
+            _arduinoPort.DiscardInBuffer();
+            _arduinoPort.DiscardOutBuffer();
+            _arduinoPort.Close();
+        }
     }
     void OnApplicationQuit() {
     //     ReleaseResources();
         if(_arduinoPort.IsOpen) {
-                    _arduinoPort.DiscardInBuffer();
-                    _arduinoPort.DiscardOutBuffer();
-                    _arduinoPort.Close();
-                }
+            _arduinoPort.DiscardInBuffer();
+            _arduinoPort.DiscardOutBuffer();
+            _arduinoPort.Close();
+        }
     }
     // void ReleaseResources() {
     //     _sensorReadings.ReleaseResources();
     // }
 
-    void GetHeldObjectMass(XRBaseInteractable interactable){
-        List<Collider> colliderList = interactable.colliders;
-        _cachedMass = colliderList[0].attachedRigidbody.mass;
-    }
+    // void GetHeldObjectMass(XRBaseInteractable interactable){
+    //     List<Collider> colliderList = interactable.colliders;
+    //     _cachedMass = colliderList[0].attachedRigidbody.mass;
+    // }
 
-    void ZeroHeldObjectMass(XRBaseInteractable interactable) {
-        _cachedMass = 0;
-    }
+    // void ZeroHeldObjectMass(XRBaseInteractable interactable) {
+    //     _cachedMass = 0;
+    // }
 
-    int count = 0;
-    int period = 1;
+    // int count = 0;
+    // int period = 1;
     void FixedUpdate()
     {
         // if(_sensorReadings == null) {
@@ -253,23 +253,23 @@ public class SimulationForce : MonoBehaviour
         
         
         //applyTorques(elbowTorque, cableMotorTorque);
-        _collisionForce.Set(0,0,0);
+        // _collisionForce.Set(0,0,0);
     }
 
-    void OnCollisionEnter(Collision collision){
+    // void OnCollisionEnter(Collision collision){
         //Assume all collisions happen over one Time.fixedDeltaTime unit.
 
         //Note to self: Add the hold collision force later. 
-        _collisionForce = collision.impulse/Time.fixedDeltaTime;
-    }
+        // _collisionForce = collision.impulse/Time.fixedDeltaTime;
+    // }
 
-    void OnCollisionExit(Collision collision) {
-        _collisionForce.Set(0,0,0);
-    }
+    // void OnCollisionExit(Collision collision) {
+    //     _collisionForce.Set(0,0,0);
+    // }
 
-    void applyTorques(float elbowTorque, float cableMotorTorque)
-    {
-        if(armCmdMutex.WaitOne(1)) {
+    // void applyTorques(float elbowTorque, float cableMotorTorque)
+    // {
+        // if(armCmdMutex.WaitOne(1)) {
             // bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
             //     Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
             //     Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
@@ -286,7 +286,7 @@ public class SimulationForce : MonoBehaviour
             //     _armCmd.elbow.SetTorqueHold(elbowTorque);
             // }
 
-            _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
+            // _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
             
             // if (_portMutex.WaitOne(1)) {
             //     _armCmd.Send();
@@ -294,9 +294,9 @@ public class SimulationForce : MonoBehaviour
             // }
             
             // newCmdReady = true;
-            armCmdMutex.ReleaseMutex();
-        }
-    }
+        //     armCmdMutex.ReleaseMutex();
+        // }
+    // }
     void Update() {
 
         float elbowTorque = 0.2f;
@@ -312,16 +312,16 @@ public class SimulationForce : MonoBehaviour
         //     armCmdMutex.ReleaseMutex();
         // }
     }
-    private Mutex armCmdMutex = new Mutex();
-    private bool newCmdReady;
-    private Vector3 _simForce;
-    public float _cachedMass = 0f;
-    private Vector3 _collisionForce = new Vector3(0,0,0);
+    // private Mutex armCmdMutex = new Mutex();
+    // private bool newCmdReady;
+    // private Vector3 _simForce;
+    // public float _cachedMass = 0f;
+    // private Vector3 _collisionForce = new Vector3(0,0,0);
     
     
     private BraceCmd _armCmd;
-    private ArmVectorModel _armModel;
-    private ArmMotionEstimators _armMotionEstimators;
+    // private ArmVectorModel _armModel;
+    // private ArmMotionEstimators _armMotionEstimators;
     private SerialPort _arduinoPort;
-    private SensorReadings _sensorReadings = null;
+    // private SensorReadings _sensorReadings = null;
 }
