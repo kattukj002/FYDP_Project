@@ -325,7 +325,7 @@ public class SimulationForce : MonoBehaviour
 
         while(!quitThread) {
             if ((DateTime.Now - startTime) >= interval) {
-                armCmd.Send();
+                _armCmd.Send();
                 startTime = DateTime.Now;
             }
         }
