@@ -24,9 +24,9 @@ public class EchoFramesFromUnity_VERSION_2 : MonoBehaviour
             arduino.Open();
         }
         
-        DateTime startime =  DateTime.Now;
-        TimeSpan dur = TimeSpan.FromMilliseconds(3000);
-        while (DateTime.Now - startime < dur) {}
+        // DateTime startime =  DateTime.Now;
+        // TimeSpan dur = TimeSpan.FromMilliseconds(3000);
+        // while (DateTime.Now - startime < dur) {}
         armCmd = new BraceCmd(
                 arduino, 
                 elbow_:new MotorCmdFormat(
