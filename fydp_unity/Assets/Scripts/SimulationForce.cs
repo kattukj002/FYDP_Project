@@ -220,16 +220,16 @@ public class SimulationForce : MonoBehaviour
             Start();
             return;
         }
-        // _simForce = Physics.gravity*_cachedMass + _collisionForce;
+        _simForce = Physics.gravity*_cachedMass + _collisionForce;
     
-        // if (_cachedMass > 0){
-        //     _simForce += _armMotionEstimators.RightControllerPosition.EstimateAcceleration() * ArmMass * 
-        //         _cachedMass / (ArmMass + _cachedMass);
-        // }
+        if (_cachedMass > 0){
+            _simForce += _armMotionEstimators.RightControllerPosition.EstimateAcceleration() * ArmMass * 
+                _cachedMass / (ArmMass + _cachedMass);
+        }
 
-        // _armModel.CalculateMotorTorques(_simForce, 
-        //                                 out float elbowTorque, 
-        //                                 out float cableMotorTorque);
+        _armModel.CalculateMotorTorques(_simForce, 
+                                        out float elbowTorque, 
+                                        out float cableMotorTorque);
         
         // if (!FinalTestDisable) {
         //     if (display_values)
