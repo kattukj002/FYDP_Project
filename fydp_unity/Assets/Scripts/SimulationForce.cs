@@ -96,102 +96,88 @@ public class SimulationForce : MonoBehaviour
     private Thread sendThread;
     private bool quitThread;   
     
-    public IEnumerator Wait()
-    {
-    yield return new WaitForSeconds(1.0f);
-    }
-    void Start()
-    {
-        quitThread = false;
+    void InitAll() {
         if(!FinalTestDisable) {
             XRDirectInteractor controllerInteractor = GetComponentInParent<XRDirectInteractor>();
             controllerInteractor.onSelectEntered.AddListener(GetHeldObjectMass);
             controllerInteractor.onSelectExited.AddListener(ZeroHeldObjectMass);
         }
-        
-        bool keepWaiting = true;
-        while(keepWaiting) {
-            StartCoroutine(Wait());
-            bool gotRightController = VRUtils.TryGetInputDevice(VRUtils.DeviceId.RightController, out InputDevice rightController);
+        if(!_started) {
+            quitThread = false;
+            if(!UseDummyInputs) {
             
-            if (gotRightController) {
-                if (rightController.TryGetFeatureValue(CommonUsages.secondaryButton, out bool rightControllerSecondaryButtonPressed)) {
-                    if (rightControllerSecondaryButtonPressed) {
-                        keepWaiting = false;
+                // if(!_started) {
+                    _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
+                    //Will need to look into the correct values for this.
+                    _arduinoPort.WriteTimeout = SerialWriteTimeout;
+                    _arduinoPort.ReadTimeout = SerialReadTimeout;
+                    _arduinoPort.ReadBufferSize = SerialReadBufferSize;
+                    _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
+                    
+                    _arduinoPort.Open();
+                        // _arduinoPort.DiscardInBuffer();
+                        // _arduinoPort.DiscardOutBuffer();
+                    if (!_arduinoPort.IsOpen) {
+                        throw new Exception("Unable to open port");
                     }
+                    _started = true;
+                // }
+
+                if (_arduinoPort.BreakState){
+                    throw new Exception("Broken port!");
                 }
-            }
-        }
 
-        if(!UseDummyInputs) {
-        
-            if(!_started) {
-                _arduinoPort = new SerialPort(ArduinoPortName, ArduinoBaudRate);
-                //Will need to look into the correct values for this.
-                _arduinoPort.WriteTimeout = SerialWriteTimeout;
-                _arduinoPort.ReadTimeout = SerialReadTimeout;
-                _arduinoPort.ReadBufferSize = SerialReadBufferSize;
-                _arduinoPort.WriteBufferSize = SerialWriteBufferSize;
-                
-                _arduinoPort.Open();
-                    // _arduinoPort.DiscardInBuffer();
-                    // _arduinoPort.DiscardOutBuffer();
-                if (!_arduinoPort.IsOpen) {
-                    throw new Exception("Unable to open port");
+                _armCmd = new BraceCmd(
+                    _arduinoPort, 
+                    elbow_:new MotorCmdFormat(
+                        torqueRatingNm:1.2f, torqueCmdFullScale:MotorPowerFraction * 89, gearRatio:5, 
+                        stictionEncodedTorque:8),
+                    shoulderDown_:new MotorCmdFormat(
+                        torqueRatingNm:1.89f, torqueCmdFullScale:MotorPowerFraction * 89, gearRatio:ShoulderGearRatio, 
+                        stictionEncodedTorque:8, isCableMotor:true)
+                    );
+            }
+            EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
+                if(state == PlayModeStateChange.ExitingPlayMode){
+                    this.EndThreads();
                 }
-                _started = true;
-            }
+            };
 
-            if (_arduinoPort.BreakState){
-                throw new Exception("Broken port!");
-            }
+            float elbowTorque = 0f;
+            float cableMotorTorque = 0f;
+            _armCmd.elbow.SetTorqueMove(-elbowTorque);
+            _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
+            
+            sendThread = new Thread(this.TxThreadFcn);
+            sendThread.Start();
 
-            _armCmd = new BraceCmd(
-                _arduinoPort, 
-                elbow_:new MotorCmdFormat(
-                    torqueRatingNm:1.2f, torqueCmdFullScale:MotorPowerFraction * 89, gearRatio:5, 
-                    stictionEncodedTorque:8),
-                shoulderDown_:new MotorCmdFormat(
-                    torqueRatingNm:1.89f, torqueCmdFullScale:MotorPowerFraction * 89, gearRatio:ShoulderGearRatio, 
-                    stictionEncodedTorque:8, isCableMotor:true)
-                );
+            CalibrationValues calibrationValues = new CalibrationValues();
+            calibrationValues.UpperArmLength = UpperArmLength;
+            calibrationValues.LowerArmLength = LowerArmLength;
+            calibrationValues.ShoulderDistFromNeckBase = ShoulderDistFromNeckBase;
+            calibrationValues.NeckBaseOffsetFromHeadset = NeckBaseOffsetFromHeadset;
+            calibrationValues.CableMotorOffsetfromShoulder = CableMotorOffsetfromShoulder;
+            calibrationValues.CableWinchRadius = CableWinchRadius;
+            calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
+
+            _sensorReadings = new SensorReadings(
+                new BraceSensorReader(_arduinoPort), //_portMutex), 
+                TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
+
+            _armModel = new ArmVectorModel(_sensorReadings,
+                    calibrationValues, 
+                    useDummyInputs: UseDummyInputs,
+                    printIntermediateValues: PrintIntermediateValues,
+                    useLeftControllerAsElbowTracker: UseLeftControllerAsElbowTracker,
+                    ignoreImu:IgnoreImu,
+                    FinalTestDisable:FinalTestDisable);
+
+            _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
         }
-        EditorApplication.playModeStateChanged += (PlayModeStateChange state) => {
-            if(state == PlayModeStateChange.ExitingPlayMode){
-                this.EndThreads();
-            }
-        };
-
-        float elbowTorque = 0f;
-        float cableMotorTorque = 0f;
-        _armCmd.elbow.SetTorqueMove(-elbowTorque);
-        _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
+    }
+    void Start()
+    {
         
-        sendThread = new Thread(this.TxThreadFcn);
-        sendThread.Start();
-
-        CalibrationValues calibrationValues = new CalibrationValues();
-        calibrationValues.UpperArmLength = UpperArmLength;
-        calibrationValues.LowerArmLength = LowerArmLength;
-        calibrationValues.ShoulderDistFromNeckBase = ShoulderDistFromNeckBase;
-        calibrationValues.NeckBaseOffsetFromHeadset = NeckBaseOffsetFromHeadset;
-        calibrationValues.CableMotorOffsetfromShoulder = CableMotorOffsetfromShoulder;
-        calibrationValues.CableWinchRadius = CableWinchRadius;
-        calibrationValues.ImuSensorMsgFreq = ImuSensorMsgFreq;
-
-        _sensorReadings = new SensorReadings(
-            new BraceSensorReader(_arduinoPort), //_portMutex), 
-            TimeSpan.FromMilliseconds(sensorDataRelevanceLifetimeMs));
-
-        _armModel = new ArmVectorModel(_sensorReadings,
-                calibrationValues, 
-                useDummyInputs: UseDummyInputs,
-                printIntermediateValues: PrintIntermediateValues,
-                useLeftControllerAsElbowTracker: UseLeftControllerAsElbowTracker,
-                ignoreImu:IgnoreImu,
-                FinalTestDisable:FinalTestDisable);
-
-        _armMotionEstimators = new ArmMotionEstimators(Time.fixedDeltaTime);
     }
 
     void EndThreads() {
@@ -215,6 +201,16 @@ public class SimulationForce : MonoBehaviour
     int period = 1;
     void FixedUpdate()
     {
+        if (!_started) {
+            if(VRUtils.TryGetInputDevice(VRUtils.DeviceId.RightController, out InputDevice rhsctrler)) {
+                if (rhsctrler.TryGetFeatureValue(CommonUsages.secondaryButton, out bool tempRightControllerSecondaryButtonPressed)) {
+                    if (tempRightControllerSecondaryButtonPressed) {
+                        InitAll();
+                    }
+                }
+            }
+        }
+        
         if(_sensorReadings == null || _armMotionEstimators == null) {
             return;
         }
