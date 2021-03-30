@@ -88,8 +88,8 @@ public class SimulationForce : MonoBehaviour
             return ElbowDeg.filled && RightControllerPosition.filled;
         }
     }
-    // private bool _started = false;
-    // private Mutex _portMutex = new Mutex();
+    private bool _started = false;
+    private Mutex _portMutex = new Mutex();
     void Start()
     {
         // if(!FinalTestDisable) {
@@ -239,18 +239,18 @@ public class SimulationForce : MonoBehaviour
         
         
         //applyTorques(elbowTorque, cableMotorTorque);
-        //_collisionForce.Set(0,0,0);
+        _collisionForce.Set(0,0,0);
     }
 
     void OnCollisionEnter(Collision collision){
         //Assume all collisions happen over one Time.fixedDeltaTime unit.
 
         //Note to self: Add the hold collision force later. 
-        // _collisionForce = collision.impulse/Time.fixedDeltaTime;
+        _collisionForce = collision.impulse/Time.fixedDeltaTime;
     }
 
     void OnCollisionExit(Collision collision) {
-        // _collisionForce.Set(0,0,0);
+        _collisionForce.Set(0,0,0);
     }
 
     void applyTorques(float elbowTorque, float cableMotorTorque)
