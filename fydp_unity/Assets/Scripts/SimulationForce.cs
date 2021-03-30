@@ -267,34 +267,26 @@ public class SimulationForce : MonoBehaviour
     TimeSpan dur = TimeSpan.FromMilliseconds(1000);
     void applyTorques(float elbowTorque, float cableMotorTorque)
     {
-        // if (!newCmdReady) {
-            // bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
-            //     Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
-            //     Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
-            //     Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold);
+        if (!newCmdReady) {
+            bool movementInSameDirAsTorque = (Math.Abs(_armMotionEstimators.ElbowDeg.EstimateVelocity()) >= (1 << 5)/Time.fixedDeltaTime && 
+                Math.Sign(_armMotionEstimators.ElbowDeg.EstimateVelocity()) == Math.Sign(elbowTorque) &&
+                Math.Sign(_sensorReadings.Data.RightControllerVelocity.y) == Math.Sign(elbowTorque) && 
+                Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) >= RightControllerVelocityThreshold);
 
-            // bool notMoving = Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold;
+            bool notMoving = Math.Abs(_sensorReadings.Data.RightControllerVelocity.y) <= RightControllerVelocityThreshold;
             
-            // if (RemoveHoldCommands || movementInSameDirAsTorque || notMoving) {
+            if (RemoveHoldCommands || movementInSameDirAsTorque || notMoving) {
                 
-            //     elbowTorque = -elbowTorque;
-            //     _armCmd.elbow.SetTorqueMove(elbowTorque);
-            // } else {
-            //     elbowTorque = -elbowTorque;
-            //     _armCmd.elbow.SetTorqueHold(elbowTorque);
-            // }
-            // _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
-            var rand = new System.Random();
-            if (DateTime.Now - myTime > dur) {
-                _armCmd.elbow.SetTorqueMove((float)rand.NextDouble()*5);
-                myTime = DateTime.Now;
+                elbowTorque = -elbowTorque;
+                _armCmd.elbow.SetTorqueMove(elbowTorque);
+            } else {
+                elbowTorque = -elbowTorque;
+                _armCmd.elbow.SetTorqueHold(elbowTorque);
             }
-            
-            Logging.PrintQtyScalar("ELBOW_TORQUE", elbowTorque, "N-m");
-            //Logging.PrintQtyScalar("CABLE_MOTOR_TORQUE", cableMotorTorque, "N-m");
+            _armCmd.shoulderDown.SetTorqueMove(-cableMotorTorque);
 
              newCmdReady = true;
-        // }
+        }
     }
     uint mult = 0;
     void TxThreadFcn() {
@@ -303,18 +295,18 @@ public class SimulationForce : MonoBehaviour
         TimeSpan interval = TimeSpan.FromMilliseconds(1);
 
         while(!quitThread) {
+            // if (DateTime.Now - myTime > dur) {
+            //     mult ^= 1;
+            //     _armCmd.elbow.SetTorqueMove(5 * (int)mult);
+            //     myTime = DateTime.Now;
+            // }
+
             if ((DateTime.Now - startTime) >= interval && newCmdReady) {
                 // if (_portMutex.WaitOne(1)) {
-                    
-                    if (DateTime.Now - myTime > dur) {
-                        mult ^= 1;
-                        _armCmd.elbow.SetTorqueMove(5 * (int)mult);
-                        myTime = DateTime.Now;
-                    }
-                    _armCmd.Send();
+                _armCmd.Send();
                 //     _portMutex.ReleaseMutex();
                 // }
-                //newCmdReady = false;
+                newCmdReady = false;
                 startTime = DateTime.Now;
             }
         }
