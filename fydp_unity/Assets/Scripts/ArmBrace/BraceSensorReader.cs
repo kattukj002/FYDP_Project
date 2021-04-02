@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO.Ports;
 using System.Threading; 
 using System;
+using FYDP.Utils;
 
 namespace FYDP {
     namespace ArmBrace {
@@ -157,6 +158,9 @@ namespace FYDP {
                 uint writeBufferIndex = _readBufferIndex ^ 1;
                 int bytesRead = 0;
 
+                int msgsReceivedByUnity = 0, numFubar = 0;
+                DateTime startTime = DateTime.Now;
+
                 while (!_stopThreadNeatly) {
                     if (_arduinoPort.IsOpen) {
                         
@@ -210,9 +214,15 @@ namespace FYDP {
                         // be fine.
                         if (currFrameMsgByte >= _frameMsgLength) {
                             buildingIncompleteFrame = false;
+
+                            float currTime = (float)(DateTime.Now - startTime).TotalMilliseconds;
                             
+                            msgsReceivedByUnity += 1;
+                            Logging.PrintQtyScalar("NUM_MSGS_RCVD_BY_UNITY", msgsReceivedByUnity);
+                            Logging.PrintQtyScalar("ELAPSED_MS", currTime, "ms");
                             if (msgBytes[0] == 0xFF) {
-                                throw new Exception("FUBAR!");
+                                numFubar += 1;
+                                Logging.PrintQtyScalar("NUM_FUBAR_MSGS_RCVD", numFubar);
                                 continue;
                             }
                             ProcessInputByteArray(
